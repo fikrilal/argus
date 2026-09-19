@@ -5,6 +5,7 @@ use std::env;
 
 mod cli;
 mod config;
+mod git;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,10 +25,17 @@ async fn main() -> Result<()> {
 
     match cli.command {
         cli::Commands::Audit(args) => {
+            let active_branch = git::detect_current_branch(&current_dir)
+                .await
+                .unwrap_or_else(|_| "main".to_string());
+            let branch_slug = git::slugify_branch_name(&active_branch);
+
             println!(
-                "{} squad='{}' (base='{}')",
+                "{} squad='{}' (branch='{}' [slug='{}'], base='{}')",
                 "Running Argus audit for:".bold().cyan(),
                 args.squad.yellow(),
+                active_branch.green(),
+                branch_slug.green(),
                 args.base.as_deref().unwrap_or("auto-detect").yellow()
             );
         }

@@ -54,11 +54,11 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 2: Git Engine & Diff Noise Filtering
 
 ### Task 2.1: Branch Detection & Session Slugification (`src/git/branch.rs`)
-- [ ] Detect current Git branch via `git rev-parse --abbrev-ref HEAD`.
-- [ ] Implement slugifier: convert `DEV/AFM/AUTH_MIGRATION` $\to$ `DEV-AFM-AUTH-MIGRATION` (safe for session names and paths).
-- [ ] Unit tests for slash and special character sanitization.
-- [ ] **Verification:** `cargo test git::branch` passes.
-- [ ] **Commit:** `feat(git): add branch detection and session slugification`
+- [x] Detect current Git branch via `git rev-parse --abbrev-ref HEAD`.
+- [x] Implement slugifier: convert `DEV/AFM/AUTH_MIGRATION` $\to$ `DEV-AFM-AUTH_MIGRATION` (safe for session names and paths).
+- [x] Unit tests for slash and special character sanitization.
+- [x] **Verification:** `cargo test git::branch` passes.
+- [x] **Commit:** `feat(git): add branch detection and session slugification`
 
 ### Task 2.2: Git Diff Extractor (`src/git/diff.rs`)
 - [ ] Implement Git diff extraction via `tokio::process::Command`:
