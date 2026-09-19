@@ -90,16 +90,16 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 4: Two-Tier Persona Engine
 
 ### Task 4.1: Persona Definition & Frontmatter Parser (`src/persona/frontmatter.rs`)
-- [ ] Parse Markdown with YAML frontmatter using `gray_matter`:
+- [x] Parse Markdown with YAML frontmatter using `gray_matter`:
   - `name`: string identifier (e.g. `stock-ledger-auditor`)
   - `title`: human-readable description
   - `squad`: `forms` | `state` | `sync` | `spec`
   - `model_tier`: `fast` | `standard` | `deep`
   - `tools`: comma-separated tool list (`read, grep, find, ls, bash`)
-- [ ] System prompt body extraction.
-- [ ] Unit tests for valid and invalid frontmatter.
-- [ ] **Verification:** `cargo test persona::frontmatter` passes.
-- [ ] **Commit:** `feat(persona): implement persona frontmatter parser and validation`
+- [x] System prompt body extraction.
+- [x] Unit tests for valid and invalid frontmatter.
+- [x] **Verification:** `cargo test persona::frontmatter` passes.
+- [x] **Commit:** `feat(persona): implement persona frontmatter parser and validation`
 
 ### Task 4.2: Embedded Tier-1 Base Personas (`src/persona/builtin.rs`)
 - [ ] Embed default personas directly into the binary using `include_str!`:

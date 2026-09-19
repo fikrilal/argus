@@ -7,6 +7,7 @@ mod cli;
 mod config;
 mod context;
 mod git;
+mod persona;
 
 #[tokio::main]
 async fn main() -> Result<()> {
