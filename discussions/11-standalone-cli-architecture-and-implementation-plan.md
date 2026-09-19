@@ -126,7 +126,7 @@ argus/
 name = "argus"
 version = "0.1.0"
 edition = "2024"
-authors = ["Ahmad Fikri <fikrildev@gmail.com>"]
+authors = ["ahmad fikril <fikrildev@gmail.com>"]
 description = "The all-seeing pre-flight QA swarm. Catches edge cases, state invariant leaks, and spec gaps before human QA."
 license = "MIT"
 repository = "https://github.com/fikrilal/argus"

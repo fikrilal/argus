@@ -2,5 +2,38 @@
 name = "argus"
 version = "0.1.0"
 edition = "2024"
+authors = ["ahmad fikril <fikrildev@gmail.com>"]
+description = "The all-seeing pre-flight QA swarm. Catches edge cases, state invariant leaks, and spec gaps before human QA."
+license = "MIT"
+repository = "https://github.com/fikrilal/argus"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "warn"
+dbg_macro = "warn"
 
 [dependencies]
+clap = { version = "4.5", features = ["derive", "cargo", "env"] }
+tokio = { version = "1.38", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+indicatif = { version = "0.17", features = ["tokio"] }
+colored = "2.1"
+gray_matter = "0.2"
+anyhow = "1.0"
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+walkdir = "2.5"
+regex = "1.10"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3.10"
+assert_cmd = "2.0"
+predicates = "3.1"

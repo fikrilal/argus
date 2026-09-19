@@ -72,4 +72,4 @@ The core research, discussions, and design specifications are cataloged in [`dis
 
 ## License
 
-MIT © [Ahmad Fikri](https://github.com/fikrilal)
+MIT © [ahmad fikril](https://github.com/fikrilal)

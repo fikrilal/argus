@@ -2,7 +2,7 @@
 
 **Status:** Approved (Implementation Phase)  
 **Target Repository:** `fikrilal/argus`  
-**Author:** Ahmad Fikri (<fikrildev@gmail.com>)  
+**Author:** ahmad fikril (<fikrildev@gmail.com>)  
 **Version:** 1.0.0  
 **Date:** October 2026  
 **Related Discussion Records:** [`discussions/01` through `12`](./discussions/)  
