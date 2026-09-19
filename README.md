@@ -27,6 +27,8 @@ Human developers have two eyes and experience cognitive fatigue. When building f
 ## Architectural Foundations & Design Records
 
 The core research, discussions, and design specifications are cataloged in [`discussions/`](./discussions/):
+- **Implementation Roadmap & Task Breakdown:** See [`TODO.md`](./TODO.md)
+- **Consolidated Engineering Proposal:** See [`PROPOSAL.md`](./PROPOSAL.md)
 
 1. **[`01-problem-statement-and-context.md`](./discussions/01-problem-statement-and-context.md)**  
    *Problem Statement, Context & Objectives* — Analysis of why developer unit testing misses QA bugs, impact on KPI, and the core challenge we are solving.
