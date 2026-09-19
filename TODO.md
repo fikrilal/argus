@@ -20,18 +20,18 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 1: Foundation, CLI Skeleton & Configuration
 
 ### Task 1.1: Dependencies & Project Manifest (`Cargo.toml`)
-- [ ] Add core crates: `clap` (derive, cargo, env), `tokio` (full), `serde`, `serde_yaml`, `colored`, `indicatif`, `anyhow`, `gray_matter`, `walkdir`, `regex`, `chrono`.
-- [ ] Configure release build profile (`opt-level = 3`, `lto = true`, `strip = true`).
-- [ ] **Verification:** `cargo check` passes cleanly.
-- [ ] **Commit:** `chore(cargo): configure dependencies and release profile`
+- [x] Add core crates: `clap` (derive, cargo, env), `tokio` (full), `serde`, `serde_yaml`, `colored`, `indicatif`, `anyhow`, `gray_matter`, `walkdir`, `regex`, `chrono`.
+- [x] Configure release build profile (`opt-level = 3`, `lto = true`, `strip = true`).
+- [x] **Verification:** `cargo check` passes cleanly.
+- [x] **Commit:** `chore(cargo): configure dependencies and release profile`
 
 ### Task 1.2: CLI Subcommands & Argument Parsing (`src/cli/`)
-- [ ] Create `src/cli/args.rs` with `clap` derive structs:
+- [x] Create `src/cli/args.rs` with `clap` derive structs:
   - Top-level `Cli` with global flags (`--verbose`, `--config`).
   - Subcommands: `Audit`, `Init`, `Personas`, `Resume`.
-- [ ] Wire entry point in `src/main.rs`.
-- [ ] **Verification:** `cargo run -- --help` prints formatted help with all subcommands.
-- [ ] **Commit:** `feat(cli): define top-level command-line interface and subcommands`
+- [x] Wire entry point in `src/main.rs`.
+- [x] **Verification:** `cargo run -- --help` prints formatted help with all subcommands.
+- [x] **Commit:** `feat(cli): define top-level command-line interface and subcommands`
 
 ### Task 1.3: Project Configuration Model & Loader (`src/config/`)
 - [ ] Create `src/config/schema.rs` with `ArgusConfig`, `SfdConfig`, `ModelTiers`, and `SquadConfig`.

@@ -1,0 +1,83 @@
+#![allow(clippy::unwrap_used, clippy::expect_used)]
+
+use assert_cmd::Command;
+use predicates::prelude::*;
+
+#[test]
+fn test_cli_version() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.arg("--version")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("argus 0.1.0"));
+}
+
+#[test]
+fn test_cli_help() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.arg("--help")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Argus unleashes a multi-agent adversarial swarm",
+        ))
+        .stdout(predicate::str::contains("audit"))
+        .stdout(predicate::str::contains("init"))
+        .stdout(predicate::str::contains("personas"))
+        .stdout(predicate::str::contains("resume"));
+}
+
+#[test]
+fn test_cli_audit_help() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Run an adversarial QA audit"))
+        .stdout(predicate::str::contains("--squad"))
+        .stdout(predicate::str::contains("--sfd"))
+        .stdout(predicate::str::contains("--concurrency"));
+}
+
+#[test]
+fn test_cli_init_help() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["init", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Initialize Argus configuration"))
+        .stdout(predicate::str::contains("--force"))
+        .stdout(predicate::str::contains("--target-dir"));
+}
+
+#[test]
+fn test_cli_personas_help() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["personas", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Inspect and list available agent personas",
+        ))
+        .stdout(predicate::str::contains("list"))
+        .stdout(predicate::str::contains("show"));
+}
+
+#[test]
+fn test_cli_resume_help() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["resume", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Resume an active agent session"))
+        .stdout(predicate::str::contains("--persona"))
+        .stdout(predicate::str::contains("--branch"));
+}
+
+#[test]
+fn test_cli_no_args_shows_usage_error() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.assert()
+        .failure()
+        .stderr(predicate::str::contains("Usage: argus"));
+}
