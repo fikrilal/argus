@@ -1,15 +1,25 @@
 use anyhow::Result;
 use clap::Parser;
 use colored::Colorize;
+use std::env;
 
 mod cli;
+mod config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = cli::Cli::parse();
+    let current_dir = env::current_dir()?;
+    let argus_config = config::load_config(cli.config.as_deref(), &current_dir)?;
 
     if cli.verbose {
         println!("{}", "[argus] Verbose mode enabled".dimmed());
+        println!(
+            "{} project='{}' (version={})",
+            "[argus] Config loaded:".dimmed(),
+            argus_config.project.cyan(),
+            argus_config.version
+        );
     }
 
     match cli.command {

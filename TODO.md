@@ -34,11 +34,11 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(cli): define top-level command-line interface and subcommands`
 
 ### Task 1.3: Project Configuration Model & Loader (`src/config/`)
-- [ ] Create `src/config/schema.rs` with `ArgusConfig`, `SfdConfig`, `ModelTiers`, and `SquadConfig`.
-- [ ] Create `src/config/loader.rs` to locate and parse `.argus/config.yaml` (or fallback to default config).
-- [ ] Unit tests for YAML deserialization and default fallbacks.
-- [ ] **Verification:** `cargo test config` passes.
-- [ ] **Commit:** `feat(config): implement .argus/config.yaml parser and schema models`
+- [x] Create `src/config/schema.rs` with `ArgusConfig`, `SfdConfig`, `ModelTiersConfig`, and `SquadConfig`.
+- [x] Create `src/config/loader.rs` to locate and parse `.argus/config.yaml` (or fallback to default config).
+- [x] Unit tests for YAML deserialization and default fallbacks.
+- [x] **Verification:** `cargo test config` passes.
+- [x] **Commit:** `feat(config): implement .argus/config.yaml parser and schema models`
 
 ### Task 1.4: Scaffolding Command (`argus init`)
 - [ ] Implement `src/cli/commands/init.rs`:
