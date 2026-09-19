@@ -27,6 +27,8 @@ Human developers have two eyes and experience cognitive fatigue. When building f
 ## Architectural Foundations & Design Records
 
 The core research, discussions, and design specifications are cataloged in [`discussions/`](./discussions/):
+- **Agent Guidelines & Operating Contract:** See [`AGENTS.md`](./AGENTS.md)
+- **Harness & Verification Loop:** See [`docs/engineering/`](./docs/engineering/)
 - **Implementation Roadmap & Task Breakdown:** See [`TODO.md`](./TODO.md)
 - **Consolidated Engineering Proposal:** See [`PROPOSAL.md`](./PROPOSAL.md)
 
