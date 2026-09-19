@@ -5,6 +5,7 @@ use std::env;
 
 mod cli;
 mod config;
+mod context;
 mod git;
 
 #[tokio::main]
@@ -29,6 +30,7 @@ async fn main() -> Result<()> {
                 .await
                 .unwrap_or_else(|_| "main".to_string());
             let branch_slug = git::slugify_branch_name(&active_branch);
+            let sfd_doc = context::load_sfd(args.sfd.as_deref(), &argus_config, &current_dir)?;
 
             println!(
                 "{} squad='{}' (branch='{}' [slug='{}'], base='{}')",
@@ -38,6 +40,15 @@ async fn main() -> Result<()> {
                 branch_slug.green(),
                 args.base.as_deref().unwrap_or("auto-detect").yellow()
             );
+
+            if let Some(ref sfd) = sfd_doc {
+                println!(
+                    "{} '{}' ({})",
+                    "Active SFD:".bold().green(),
+                    sfd.title.as_deref().unwrap_or("Untitled Spec").yellow(),
+                    sfd.path.display().to_string().dimmed()
+                );
+            }
         }
         cli::Commands::Init(args) => {
             cli::commands::init::run(&args)?;

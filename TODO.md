@@ -8,7 +8,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Progress Overview
 
 - [x] **Phase 1: Foundation, CLI Skeleton & Configuration** (Tasks 1.1 – 1.4)
-- [ ] **Phase 2: Git Engine & Diff Noise Filtering** (Tasks 2.1 – 2.3)
+- [x] **Phase 2: Git Engine & Session Identity** (Task 2.1)
 - [ ] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
 - [ ] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
 - [ ] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
@@ -51,7 +51,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 
 ---
 
-## Phase 2: Git Engine & Diff Noise Filtering
+## Phase 2: Git Engine & Session Identity
 
 ### Task 2.1: Branch Detection & Session Slugification (`src/git/branch.rs`)
 - [x] Detect current Git branch via `git rev-parse --abbrev-ref HEAD`.
@@ -60,43 +60,28 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Verification:** `cargo test git::branch` passes.
 - [x] **Commit:** `feat(git): add branch detection and session slugification`
 
-### Task 2.2: Git Diff Extractor (`src/git/diff.rs`)
-- [ ] Implement Git diff extraction via `tokio::process::Command`:
-  - Diff against working tree (unstaged + staged).
-  - Diff against target base branch (e.g. `origin/main` or `HEAD~1`).
-  - Capture list of modified file paths (`git status --porcelain` or `git diff --name-only`).
-- [ ] Unit tests mocking Git output or running on a temporary git repo.
-- [ ] **Verification:** `cargo test git::diff` passes.
-- [ ] **Commit:** `feat(git): implement async git diff extraction`
-
-### Task 2.3: Diff Noise Filter (`src/git/filter.rs`)
-- [ ] Implement exclusion patterns for generated boilerplate:
-  - `*.g.dart`, `*.freezed.dart`, `*.gen.dart`
-  - `pubspec.lock`, `Cargo.lock`, `package-lock.json`, `pnpm-lock.yaml`
-  - Build directories: `build/`, `dist/`, `.dart_tool/`, `target/`
-- [ ] Filter raw diff to keep only human-authored logic files.
-- [ ] Return metrics: total lines vs. filtered lines, list of excluded files.
-- [ ] Unit tests asserting generated files are stripped from diff chunks.
-- [ ] **Verification:** `cargo test git::filter` passes.
-- [ ] **Commit:** `feat(git): implement diff noise filter for generated files and lockfiles`
+*(Note: Custom in-process diff parsing/filtering was intentionally eliminated in favor of delegating `git diff` inspection directly to Pi agents via their native bash/read tools, keeping the orchestrator lean and zero-maintenance).*
 
 ---
 
 ## Phase 3: Context & SFD Ingestion
 
 ### Task 3.1: SFD Specification Reader (`src/context/sfd.rs`)
-- [ ] Locate and read active Markdown SFD specified in `.argus/config.yaml` or `--sfd <path>`.
-- [ ] Validate file exists and is non-empty.
-- [ ] Provide section extractor (e.g. `## Business Rules`, `## Acceptance Criteria`).
-- [ ] Unit tests for missing, valid, and malformed SFD paths.
-- [ ] **Verification:** `cargo test context::sfd` passes.
-- [ ] **Commit:** `feat(context): implement Markdown SFD specification reader`
+- [x] Locate and read active Markdown SFD specified in `.argus/config.yaml` or `--sfd <path>`.
+- [x] Validate file exists and is non-empty.
+- [x] Provide helper to read SFD content or path.
+- [x] Unit tests for missing, valid, and custom SFD paths.
+- [x] **Verification:** `cargo test context::sfd` passes.
+- [x] **Commit:** `feat(context): implement Markdown SFD specification reader`
 
-### Task 3.2: Context Bundler (`src/context/bundle.rs`)
-- [ ] Bundle: Filtered Git Diff + Active SFD + Branch Info + Affected File List.
-- [ ] Construct the evaluation payload passed to each agent's stdin / prompt arguments.
-- [ ] Token/character count estimation to ensure context safety.
-- [ ] Unit tests for bundle construction.
+### Task 3.2: Task Context & Payload Builder (`src/context/bundle.rs`)
+- [ ] Construct the evaluation task prompt passed to subagents:
+  - Injects target branch and base diff instructions (`--base` or `--staged`).
+  - Injects reference to active SFD file.
+  - Generates concise instructions for the agent to execute `git diff` and evaluate against its rubric.
+- [ ] Unit tests for payload generation.
+- [ ] **Verification:** `cargo test context::bundle` passes.
+- [ ] **Commit:** `feat(context): implement task context and payload builder`
 - [ ] **Verification:** `cargo test context::bundle` passes.
 - [ ] **Commit:** `feat(context): implement context payload bundler for agent dispatch`
 
