@@ -102,7 +102,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(persona): implement persona frontmatter parser and validation`
 
 ### Task 4.2: Embedded Tier-1 Base Personas (`src/persona/builtin.rs`)
-- [ ] Embed default personas directly into the binary using `include_str!`:
+- [x] Embed default personas directly into the binary using `include_str!`:
   - `sfd-clause-detective.md`
   - `id-regulatory-sentinel.md`
   - `rbac-identity-gatekeeper.md`
@@ -115,8 +115,8 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
   - `sync-deadlock-guard.md`
   - `hardware-sensor-adversary.md`
   - `lead-qa-synthesizer.md`
-- [ ] **Verification:** `cargo test persona::builtin` verifies all 12 embedded files parse cleanly.
-- [ ] **Commit:** `feat(persona): embed 12 Tier-1 core personas into binary`
+- [x] **Verification:** `cargo test persona::builtin` verifies all 12 embedded files parse cleanly.
+- [x] **Commit:** `feat(persona): embed 12 Tier-1 core personas into binary`
 
 ### Task 4.3: Two-Tier Persona Registry (`src/persona/registry.rs`)
 - [ ] Implement `PersonaRegistry::load(project_root)`:
