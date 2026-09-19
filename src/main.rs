@@ -32,11 +32,7 @@ async fn main() -> Result<()> {
             );
         }
         cli::Commands::Init(args) => {
-            println!(
-                "{} at {}",
-                "Initializing Argus:".bold().green(),
-                args.target_dir.display().to_string().yellow()
-            );
+            cli::commands::init::run(&args)?;
         }
         cli::Commands::Personas(args) => match args.action {
             cli::PersonasSubcommand::List { squad } => {

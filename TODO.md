@@ -7,7 +7,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 
 ## Progress Overview
 
-- [ ] **Phase 1: Foundation, CLI Skeleton & Configuration** (Tasks 1.1 – 1.4)
+- [x] **Phase 1: Foundation, CLI Skeleton & Configuration** (Tasks 1.1 – 1.4)
 - [ ] **Phase 2: Git Engine & Diff Noise Filtering** (Tasks 2.1 – 2.3)
 - [ ] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
 - [ ] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
@@ -41,13 +41,13 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(config): implement .argus/config.yaml parser and schema models`
 
 ### Task 1.4: Scaffolding Command (`argus init`)
-- [ ] Implement `src/cli/commands/init.rs`:
+- [x] Implement `src/cli/commands/init.rs`:
   - Scaffolds `.argus/` directory tree (`.argus/personas/`, `.argus/context/sfd/`, `.argus/reports/`).
   - Generates starter `.argus/config.yaml` and starter `.argus/oracles.yaml`.
   - Idempotent: warns if `.argus/` already exists without overwriting existing files.
-- [ ] Unit test in a temporary directory (`tempfile`).
-- [ ] **Verification:** `cargo test init` passes; running `argus init` creates valid files.
-- [ ] **Commit:** `feat(cli): implement argus init scaffolding command`
+- [x] Unit test in a temporary directory (`tempfile`).
+- [x] **Verification:** `cargo test init` passes; running `argus init` creates valid files.
+- [x] **Commit:** `feat(cli): implement argus init scaffolding command`
 
 ---
 
