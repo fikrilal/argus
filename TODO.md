@@ -9,7 +9,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 
 - [x] **Phase 1: Foundation, CLI Skeleton & Configuration** (Tasks 1.1 – 1.4)
 - [x] **Phase 2: Git Engine & Session Identity** (Task 2.1)
-- [ ] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
+- [x] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
 - [ ] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
 - [ ] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
 - [ ] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
@@ -75,13 +75,13 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(context): implement Markdown SFD specification reader`
 
 ### Task 3.2: Task Context & Payload Builder (`src/context/bundle.rs`)
-- [ ] Construct the evaluation task prompt passed to subagents:
+- [x] Construct the evaluation task prompt passed to subagents:
   - Injects target branch and base diff instructions (`--base` or `--staged`).
   - Injects reference to active SFD file.
   - Generates concise instructions for the agent to execute `git diff` and evaluate against its rubric.
-- [ ] Unit tests for payload generation.
-- [ ] **Verification:** `cargo test context::bundle` passes.
-- [ ] **Commit:** `feat(context): implement task context and payload builder`
+- [x] Unit tests for payload generation.
+- [x] **Verification:** `cargo test context::bundle` passes.
+- [x] **Commit:** `feat(context): implement task context and payload builder`
 - [ ] **Verification:** `cargo test context::bundle` passes.
 - [ ] **Commit:** `feat(context): implement context payload bundler for agent dispatch`
 

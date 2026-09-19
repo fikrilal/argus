@@ -32,16 +32,23 @@ async fn main() -> Result<()> {
             let branch_slug = git::slugify_branch_name(&active_branch);
             let sfd_doc = context::load_sfd(args.sfd.as_deref(), &argus_config, &current_dir)?;
 
+            let bundle = context::TaskContextBundle::new(
+                active_branch.clone(),
+                args.base.clone(),
+                args.staged,
+                sfd_doc,
+            );
+
             println!(
                 "{} squad='{}' (branch='{}' [slug='{}'], base='{}')",
                 "Running Argus audit for:".bold().cyan(),
                 args.squad.yellow(),
-                active_branch.green(),
+                bundle.branch.green(),
                 branch_slug.green(),
                 args.base.as_deref().unwrap_or("auto-detect").yellow()
             );
 
-            if let Some(ref sfd) = sfd_doc {
+            if let Some(ref sfd) = bundle.sfd {
                 println!(
                     "{} '{}' ({})",
                     "Active SFD:".bold().green(),
