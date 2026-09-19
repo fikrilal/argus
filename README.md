@@ -61,6 +61,9 @@ The core research, discussions, and design specifications are cataloged in [`dis
 11. **[`11-standalone-cli-architecture-and-implementation-plan.md`](./discussions/11-standalone-cli-architecture-and-implementation-plan.md)**  
     *Standalone CLI Architecture & Implementation Plan* — Rationale for standalone Rust CLI package (`argus`), directory layout, core implementation modules, dependencies, and development phases.
 
+12. **[`12-argus-end-to-end-system-architecture.md`](./discussions/12-argus-end-to-end-system-architecture.md)**  
+    *Argus End-to-End System Architecture* — Detailed three-tier topology, 8-stage data pipeline, Rust module contracts (`src/`), Tokio semaphore concurrency model, and failure mapping.
+
 ---
 
 ## License

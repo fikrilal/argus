@@ -5,7 +5,7 @@
 **Author:** Ahmad Fikri (<fikrildev@gmail.com>)  
 **Version:** 1.0.0  
 **Date:** October 2026  
-**Related Discussion Records:** [`discussions/01` through `11`](./discussions/)  
+**Related Discussion Records:** [`discussions/01` through `12`](./discussions/)  
 
 ---
 
