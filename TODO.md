@@ -179,7 +179,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 6: Lead Synthesis & Output Reporting
 
 ### Task 6.1: Defect Finding Data Model (`src/synthesis/finding.rs`)
-- [ ] Define `Finding` struct:
+- [x] Define `Finding` struct:
   - `severity`: `P0Blocker`, `P1Major`, `P2Polish`
   - `title`: concise defect summary
   - `persona`: reporting agent name
@@ -188,9 +188,9 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
   - `oracle_id`: optional matching oracle from `oracles.yaml`
   - `description`: why this breaks
   - `suggested_fix`: concrete code snippet
-- [ ] JSON serialization/deserialization for structured output.
-- [ ] **Verification:** `cargo test synthesis::finding` passes.
-- [ ] **Commit:** `feat(synthesis): define structured defect finding model and severity tiers`
+- [x] JSON serialization/deserialization for structured output.
+- [x] **Verification:** `cargo test synthesis::finding` passes.
+- [x] **Commit:** `feat(synthesis): define structured defect finding model and severity tiers`
 
 ### Task 6.2: Output Aggregator & Lead Synthesizer Orchestrator (`src/synthesis/synthesizer.rs`)
 - [ ] Collect raw text reports from all 11 worker sessions.
