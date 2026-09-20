@@ -64,6 +64,51 @@ fn test_cli_personas_help() {
 }
 
 #[test]
+fn test_cli_personas_list_execution() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["personas", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Available personas: (total: 12)"))
+        .stdout(predicate::str::contains("stock-ledger-auditor"))
+        .stdout(predicate::str::contains("form-boundary-saboteur"))
+        .stdout(predicate::str::contains("sfd-clause-detective"));
+}
+
+#[test]
+fn test_cli_personas_list_with_squad_filter() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["personas", "list", "--squad", "state"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Available personas: (total: 2)"))
+        .stdout(predicate::str::contains("stock-ledger-auditor"))
+        .stdout(predicate::str::contains("orphan-cascade-hunter"));
+}
+
+#[test]
+fn test_cli_personas_show_execution() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["personas", "show", "stock-ledger-auditor"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Persona: stock-ledger-auditor"))
+        .stdout(predicate::str::contains("Reversibility Law"))
+        .stdout(predicate::str::contains("Tier:       Deep"));
+}
+
+#[test]
+fn test_cli_personas_show_unknown_returns_error() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["personas", "show", "unknown-persona-xyz"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "Persona 'unknown-persona-xyz' not found in registry",
+        ));
+}
+
+#[test]
 fn test_cli_resume_help() {
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
     cmd.args(["resume", "--help"])

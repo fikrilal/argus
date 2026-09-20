@@ -14,6 +14,7 @@ async fn main() -> Result<()> {
     let cli = cli::Cli::parse();
     let current_dir = env::current_dir()?;
     let argus_config = config::load_config(cli.config.as_deref(), &current_dir)?;
+    let persona_registry = persona::PersonaRegistry::load(&current_dir)?;
 
     if cli.verbose {
         println!("{}", "[argus] Verbose mode enabled".dimmed());
@@ -22,6 +23,11 @@ async fn main() -> Result<()> {
             "[argus] Config loaded:".dimmed(),
             argus_config.project.cyan(),
             argus_config.version
+        );
+        println!(
+            "{} {} registered",
+            "[argus] Personas loaded:".dimmed(),
+            persona_registry.len().to_string().cyan()
         );
     }
 
@@ -40,10 +46,13 @@ async fn main() -> Result<()> {
                 sfd_doc,
             );
 
+            let squad_personas = persona_registry.get_squad(&args.squad, &argus_config)?;
+
             println!(
-                "{} squad='{}' (branch='{}' [slug='{}'], base='{}')",
+                "{} squad='{}' ({} agents, branch='{}' [slug='{}'], base='{}')",
                 "Running Argus audit for:".bold().cyan(),
                 args.squad.yellow(),
+                squad_personas.len().to_string().bold().green(),
                 bundle.branch.green(),
                 branch_slug.green(),
                 args.base.as_deref().unwrap_or("auto-detect").yellow()
@@ -57,22 +66,27 @@ async fn main() -> Result<()> {
                     sfd.path.display().to_string().dimmed()
                 );
             }
+
+            println!("{}", "Deploying agent squad:".bold().blue());
+            for p in &squad_personas {
+                let source_label = match p.source {
+                    persona::PersonaSource::Builtin => "builtin".dimmed(),
+                    persona::PersonaSource::ProjectOverride(_) => "override".yellow(),
+                };
+                println!(
+                    "  • {:<28} [{}] ({})",
+                    p.name.bold(),
+                    p.squad.cyan(),
+                    source_label
+                );
+            }
         }
         cli::Commands::Init(args) => {
             cli::commands::init::run(&args)?;
         }
-        cli::Commands::Personas(args) => match args.action {
-            cli::PersonasSubcommand::List { squad } => {
-                println!(
-                    "{} (filter: {})",
-                    "Available personas:".bold().blue(),
-                    squad.as_deref().unwrap_or("none").yellow()
-                );
-            }
-            cli::PersonasSubcommand::Show { name } => {
-                println!("{} {}", "Persona details:".bold().blue(), name.yellow());
-            }
-        },
+        cli::Commands::Personas(args) => {
+            cli::commands::personas::run(&args, &persona_registry, &argus_config)?;
+        }
         cli::Commands::Resume(args) => {
             println!(
                 "{} (persona: {})",

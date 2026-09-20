@@ -10,7 +10,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 1: Foundation, CLI Skeleton & Configuration** (Tasks 1.1 – 1.4)
 - [x] **Phase 2: Git Engine & Session Identity** (Task 2.1)
 - [x] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
-- [ ] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
+- [x] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
 - [ ] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
 - [ ] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
 - [ ] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
@@ -119,21 +119,21 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(persona): embed 12 Tier-1 core personas into binary`
 
 ### Task 4.3: Two-Tier Persona Registry (`src/persona/registry.rs`)
-- [ ] Implement `PersonaRegistry::load(project_root)`:
+- [x] Implement `PersonaRegistry::load(project_root)`:
   - Loads all 12 built-in Tier-1 personas.
   - Scans `<project_root>/.argus/personas/*.md`.
   - Overrides built-ins if name matches; registers new personas dynamically.
-- [ ] Squad filtering: `.get_squad("forms")`, `.get_squad("all")`.
-- [ ] Unit tests for override behavior and dynamic registration.
-- [ ] **Verification:** `cargo test persona::registry` passes.
-- [ ] **Commit:** `feat(persona): implement two-tier persona registry with repo overrides`
+- [x] Squad filtering: `.get_squad("forms")`, `.get_squad("all")`.
+- [x] Unit tests for override behavior and dynamic registration.
+- [x] **Verification:** `cargo test persona::registry` passes.
+- [x] **Commit:** `feat(persona): implement two-tier persona registry with repo overrides`
 
 ### Task 4.4: Personas CLI Command (`argus personas`)
-- [ ] Implement `src/cli/commands/personas.rs`:
+- [x] Implement `src/cli/commands/personas.rs`:
   - Subcommands: `list` (table of available personas, squad, source [builtin/local]).
   - `show <name>` (displays full prompt and metadata of a persona).
-- [ ] **Verification:** `cargo run -- personas list` prints formatted terminal table.
-- [ ] **Commit:** `feat(cli): add argus personas list and show commands`
+- [x] **Verification:** `cargo run -- personas list` prints formatted terminal table.
+- [x] **Commit:** `feat(cli): add argus personas list and show commands`
 
 ---
 
