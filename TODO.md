@@ -230,12 +230,12 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(cli): implement argus resume interactive session picker`
 
 ### Task 7.2: End-to-End `argus audit` Command (`src/cli/commands/audit.rs`)
-- [ ] Wire all components into unified pipeline:
+- [x] Wire all components into unified pipeline:
   `argus audit [--squad <name>] [--sfd <path>] [--base <branch>] [--staged]`
-- [ ] Steps: Git Diff $\to$ Noise Filter $\to$ Context Bundle $\to$ Persona Registry $\to$ Concurrency Pool $\to$ Synthesis $\to$ Terminal & Markdown Report.
-- [ ] Exit codes: `0` (clean / only P2), `1` (P0 or P1 defects found).
-- [ ] **Verification:** `cargo test` full test suite passes.
-- [ ] **Commit:** `feat(cli): wire end-to-end argus audit workflow`
+- [x] Steps: Git branch $\to$ Context Bundle $\to$ Persona Registry $\to$ Concurrency Pool $\to$ Synthesis $\to$ Terminal & Markdown Report.
+- [x] Exit codes: `0` (clean / only P2), `1` (P0 or P1 defects found).
+- [x] **Verification:** `cargo test --test audit_test` end-to-end integration tests pass.
+- [x] **Commit:** `feat(cli): wire end-to-end argus audit workflow and integration tests`
 
 ### Task 7.3: Field Verification on Work Codebase (`superapps`)
 - [ ] Run `argus audit` on `superapps` branch `DEV/AFM/AUTH_MIGRATION`.
