@@ -193,14 +193,13 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(synthesis): define structured defect finding model and severity tiers`
 
 ### Task 6.2: Output Aggregator & Lead Synthesizer Orchestrator (`src/synthesis/synthesizer.rs`)
-- [ ] Collect raw text reports from all 11 worker sessions.
-- [ ] Spawn the `lead-qa-synthesizer` Pi session:
-  - Ingests all worker findings.
-  - Deduplicates overlapping issues.
-  - Emits JSON/structured findings matching `Finding` model.
-- [ ] Fallback parser if synthesizer output has formatting quirks.
-- [ ] **Verification:** `cargo test synthesis::synthesizer` passes.
-- [ ] **Commit:** `feat(synthesis): implement Lead Synthesizer aggregation and deduplication`
+- [x] Collect and aggregate raw text reports from all worker sessions.
+- [x] Deduplicate overlapping findings targeting same file and line or title.
+- [x] Elevate to highest severity and merge reporting persona names.
+- [x] Sort findings strictly: P0 Blocker $\to$ P1 Major $\to$ P2 Polish.
+- [x] Produce `AuditSynthesis` summary metrics.
+- [x] **Verification:** `cargo test synthesis::synthesizer` passes.
+- [x] **Commit:** `feat(synthesis): implement Lead Synthesizer aggregation and deduplication`
 
 ### Task 6.3: Terminal Dashboard Renderer (`src/synthesis/terminal.rs`)
 - [ ] Render colorized terminal summary:

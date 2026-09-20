@@ -8,6 +8,7 @@ use crate::context::{self, TaskContextBundle};
 use crate::git;
 use crate::persona::{ModelTier, PersonaRegistry, PersonaSource};
 use crate::runner::{self, AgentExecutionPlan, SwarmPool, SwarmProgressTracker};
+use crate::synthesis::{self, AgentReport};
 
 /// Executes the `argus audit` workflow.
 pub async fn run(
@@ -93,12 +94,35 @@ pub async fn run(
 
     let results = pool.execute_all(plans, current_dir, Some(&tracker)).await?;
 
-    let success_count = results.iter().filter(|r| r.is_success()).count();
+    let reports: Vec<AgentReport> = results
+        .into_iter()
+        .map(|r| {
+            let is_success = r.is_success();
+            let raw_output = if is_success { r.stdout } else { r.stderr };
+            AgentReport {
+                persona_name: r.persona_name,
+                raw_output,
+                is_success,
+            }
+        })
+        .collect();
+
+    let synthesis = synthesis::synthesize_reports(&reports);
+
     println!(
         "\n{} Swarm execution completed: {}/{} agents succeeded.",
         "✔".bold().green(),
-        success_count.to_string().bold().green(),
-        results.len().to_string().bold()
+        synthesis.successful_agents.to_string().bold().green(),
+        synthesis.total_agents.to_string().bold()
+    );
+
+    println!(
+        "{} Findings: {} ({} blockers, {} major, {} polish)",
+        "Audit Result:".bold().cyan(),
+        synthesis.total_findings().to_string().bold(),
+        synthesis.blocker_count.to_string().bold().red(),
+        synthesis.major_count.to_string().bold().yellow(),
+        synthesis.polish_count.to_string().bold().cyan(),
     );
 
     Ok(())
