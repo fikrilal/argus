@@ -13,9 +13,9 @@ fn test_default_config_values() {
     assert_eq!(config.project, "default-project");
     assert_eq!(config.sfd.dir, PathBuf::from(".argus/context/sfd"));
     assert_eq!(config.sfd.active, None);
-    assert_eq!(config.models.fast, "google/gemini-2.5-flash");
-    assert_eq!(config.models.standard, "anthropic/claude-3-7-sonnet");
-    assert_eq!(config.models.deep, "anthropic/claude-3-7-sonnet:high");
+    assert_eq!(config.models.fast, None);
+    assert_eq!(config.models.standard, None);
+    assert_eq!(config.models.deep, None);
     assert!(config.squads.contains_key("forms"));
     assert!(config.squads.contains_key("state"));
     assert!(config.squads.contains_key("sync"));
@@ -50,10 +50,10 @@ squads:
         config.sfd.active,
         Some(PathBuf::from("stockist-kulakan.md"))
     );
-    assert_eq!(config.models.fast, "custom/fast-model");
-    // Standard and deep should fall back to defaults
-    assert_eq!(config.models.standard, "anthropic/claude-3-7-sonnet");
-    assert_eq!(config.models.deep, "anthropic/claude-3-7-sonnet:high");
+    assert_eq!(config.models.fast, Some("custom/fast-model".to_string()));
+    // Standard and deep should fall back to None
+    assert_eq!(config.models.standard, None);
+    assert_eq!(config.models.deep, None);
 
     let custom_squad = config.squads.get("custom_squad").unwrap();
     assert_eq!(custom_squad, &["persona-a", "persona-b"]);

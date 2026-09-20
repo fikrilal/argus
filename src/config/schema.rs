@@ -60,41 +60,19 @@ impl Default for SfdConfig {
 }
 
 /// Model tier mappings for agent execution
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct ModelTiersConfig {
     /// Fast model for simple scans and input boundary checks
-    #[serde(default = "default_fast_model")]
-    pub fast: String,
+    #[serde(default)]
+    pub fast: Option<String>,
 
     /// Standard model for general adversarial evaluation
-    #[serde(default = "default_standard_model")]
-    pub standard: String,
+    #[serde(default)]
+    pub standard: Option<String>,
 
     /// High-reasoning model for complex SFD cross-referencing and state invariant analysis
-    #[serde(default = "default_deep_model")]
-    pub deep: String,
-}
-
-fn default_fast_model() -> String {
-    "google/gemini-2.5-flash".to_string()
-}
-
-fn default_standard_model() -> String {
-    "anthropic/claude-3-7-sonnet".to_string()
-}
-
-fn default_deep_model() -> String {
-    "anthropic/claude-3-7-sonnet:high".to_string()
-}
-
-impl Default for ModelTiersConfig {
-    fn default() -> Self {
-        Self {
-            fast: default_fast_model(),
-            standard: default_standard_model(),
-            deep: default_deep_model(),
-        }
-    }
+    #[serde(default)]
+    pub deep: Option<String>,
 }
 
 fn default_squads() -> HashMap<String, Vec<String>> {

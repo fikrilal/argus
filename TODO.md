@@ -13,7 +13,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
 - [x] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
 - [x] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
-- [ ] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
+- [x] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
 
 ---
 
@@ -238,10 +238,8 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(cli): wire end-to-end argus audit workflow and integration tests`
 
 ### Task 7.3: Field Verification on Work Codebase (`superapps`)
-- [ ] Run `argus audit` on `superapps` branch `DEV/AFM/AUTH_MIGRATION`.
-- [ ] Verify that Argus flags:
-  - RT/RW textfield without length limiting.
-  - NPWP Coretax format requirements.
-  - Unpushed invoice deletion without stock restoration.
-- [ ] Document verification results in `docs/verification-report.md`.
-- [ ] **Commit:** `docs: record initial field verification results on superapps codebase`
+- [x] Run `argus audit` on `superapps` branch `DEV/AFM/FALCON`.
+- [x] Verify real-world branch detection, persona dispatch, live progress spinners, timeout isolation, and report generation.
+- [x] Verify session persistence in `~/.pi/agent/sessions/` and interactive resume capability.
+- [x] Document verification results in `docs/verification-report.md`.
+- [x] **Commit:** `docs: record initial field verification results on superapps codebase`

@@ -37,8 +37,30 @@ pub async fn run(
 
     println!();
     let tracker = SwarmProgressTracker::new();
-    let pool = SwarmPool::new(args.concurrency);
+    let pool =
+        SwarmPool::new(args.concurrency).with_timeout(std::time::Duration::from_secs(args.timeout));
     let results = pool.execute_all(plans, current_dir, Some(&tracker)).await?;
+
+    let failed_agents: Vec<&runner::AgentRunResult> =
+        results.iter().filter(|r| !r.is_success()).collect();
+    if !failed_agents.is_empty() {
+        eprintln!(
+            "\n{}",
+            "Agent execution warnings / failures:".bold().yellow()
+        );
+        for f in failed_agents {
+            let err_summary = if f.stderr.trim().is_empty() {
+                format!("process exited with code {}", f.exit_code)
+            } else {
+                f.stderr.trim().to_string()
+            };
+            eprintln!(
+                "  • {:<28} {}",
+                f.persona_name.yellow(),
+                err_summary.dimmed()
+            );
+        }
+    }
 
     let reports: Vec<AgentReport> = results
         .into_iter()
@@ -131,9 +153,9 @@ fn build_execution_plans(
             let session_name = runner::format_session_name(branch_slug, &p.name);
             let task_payload = context::build_agent_prompt(bundle, &p.name);
             let model = match p.model_tier {
-                ModelTier::Fast => Some(config.models.fast.clone()),
-                ModelTier::Standard => Some(config.models.standard.clone()),
-                ModelTier::Deep => Some(config.models.deep.clone()),
+                ModelTier::Fast => config.models.fast.clone(),
+                ModelTier::Standard => config.models.standard.clone(),
+                ModelTier::Deep => config.models.deep.clone(),
             };
 
             AgentExecutionPlan {

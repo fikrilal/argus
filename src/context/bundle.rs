@@ -47,6 +47,7 @@ pub fn build_agent_prompt(bundle: &TaskContextBundle, persona_name: &str) -> Str
     );
 
     prompt.push_str("### 1. Code Inspection Instructions\n");
+    prompt.push_str("Focus exclusively on auditing the code modifications in this repository. Do NOT search outside the current working directory.\n");
     if bundle.staged_only {
         prompt.push_str("Inspect the currently staged changes using your bash tool:\n");
         prompt.push_str("  `git diff --staged`\n");

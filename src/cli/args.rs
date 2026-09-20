@@ -61,6 +61,10 @@ pub struct AuditArgs {
     /// Maximum number of subagents to execute concurrently
     #[arg(short = 'j', long, default_value = "4")]
     pub concurrency: usize,
+
+    /// Maximum execution timeout in seconds allowed per subagent
+    #[arg(long, default_value = "300")]
+    pub timeout: u64,
 }
 
 /// Arguments for `argus init`
