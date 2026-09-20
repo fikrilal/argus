@@ -6,9 +6,9 @@ use crate::cli::args::AuditArgs;
 use crate::config::ArgusConfig;
 use crate::context::{self, TaskContextBundle};
 use crate::git;
-use crate::persona::{ModelTier, PersonaRegistry, PersonaSource};
+use crate::persona::{ModelTier, Persona, PersonaRegistry, PersonaSource};
 use crate::runner::{self, AgentExecutionPlan, SwarmPool, SwarmProgressTracker};
-use crate::synthesis::{self, AgentReport};
+use crate::synthesis::{self, AgentReport, AuditSynthesis};
 
 /// Executes the `argus audit` workflow.
 pub async fn run(
@@ -31,67 +31,13 @@ pub async fn run(
     );
 
     let squad_personas = registry.get_squad(&args.squad, config)?;
+    print_audit_header(args, &bundle, &branch_slug, &squad_personas);
 
-    println!(
-        "{} squad='{}' ({} agents, branch='{}' [slug='{}'], base='{}', concurrency={})",
-        "Running Argus audit for:".bold().cyan(),
-        args.squad.yellow(),
-        squad_personas.len().to_string().bold().green(),
-        bundle.branch.green(),
-        branch_slug.green(),
-        args.base.as_deref().unwrap_or("auto-detect").yellow(),
-        args.concurrency.to_string().yellow()
-    );
-
-    if let Some(ref sfd) = bundle.sfd {
-        println!(
-            "{} '{}' ({})",
-            "Active SFD:".bold().green(),
-            sfd.title.as_deref().unwrap_or("Untitled Spec").yellow(),
-            sfd.path.display().to_string().dimmed()
-        );
-    }
-
-    println!("{}", "Deploying agent squad:".bold().blue());
-    for p in &squad_personas {
-        let source_label = match p.source {
-            PersonaSource::Builtin => "builtin".dimmed(),
-            PersonaSource::ProjectOverride(_) => "override".yellow(),
-        };
-        println!(
-            "  • {:<28} [{}] ({})",
-            p.name.bold(),
-            p.squad.cyan(),
-            source_label
-        );
-    }
-
-    let plans: Vec<AgentExecutionPlan> = squad_personas
-        .iter()
-        .map(|p| {
-            let session_name = runner::format_session_name(&branch_slug, &p.name);
-            let task_payload = context::build_agent_prompt(&bundle, &p.name);
-            let model = match p.model_tier {
-                ModelTier::Fast => Some(config.models.fast.clone()),
-                ModelTier::Standard => Some(config.models.standard.clone()),
-                ModelTier::Deep => Some(config.models.deep.clone()),
-            };
-
-            AgentExecutionPlan {
-                persona_name: p.name.clone(),
-                session_name,
-                system_prompt: p.system_prompt.clone(),
-                task_payload,
-                model,
-                tools: p.tools.clone(),
-            }
-        })
-        .collect();
+    let plans = build_execution_plans(&squad_personas, &branch_slug, &bundle, config);
 
     println!();
     let tracker = SwarmProgressTracker::new();
     let pool = SwarmPool::new(args.concurrency);
-
     let results = pool.execute_all(plans, current_dir, Some(&tracker)).await?;
 
     let reports: Vec<AgentReport> = results
@@ -119,6 +65,8 @@ pub async fn run(
     let dashboard = synthesis::render_terminal_dashboard(&synthesis);
     print!("{dashboard}");
 
+    save_audit_report(&synthesis, &bundle, &args.squad, current_dir);
+
     if !synthesis.is_passed() {
         anyhow::bail!(
             "Audit identified {} blocker(s) and {} major defect(s). Action required before QA handoff.",
@@ -128,4 +76,98 @@ pub async fn run(
     }
 
     Ok(())
+}
+
+fn print_audit_header(
+    args: &AuditArgs,
+    bundle: &TaskContextBundle,
+    branch_slug: &str,
+    squad_personas: &[&Persona],
+) {
+    println!(
+        "{} squad='{}' ({} agents, branch='{}' [slug='{}'], base='{}', concurrency={})",
+        "Running Argus audit for:".bold().cyan(),
+        args.squad.yellow(),
+        squad_personas.len().to_string().bold().green(),
+        bundle.branch.green(),
+        branch_slug.green(),
+        args.base.as_deref().unwrap_or("auto-detect").yellow(),
+        args.concurrency.to_string().yellow()
+    );
+
+    if let Some(ref sfd) = bundle.sfd {
+        println!(
+            "{} '{}' ({})",
+            "Active SFD:".bold().green(),
+            sfd.title.as_deref().unwrap_or("Untitled Spec").yellow(),
+            sfd.path.display().to_string().dimmed()
+        );
+    }
+
+    println!("{}", "Deploying agent squad:".bold().blue());
+    for p in squad_personas {
+        let source_label = match p.source {
+            PersonaSource::Builtin => "builtin".dimmed(),
+            PersonaSource::ProjectOverride(_) => "override".yellow(),
+        };
+        println!(
+            "  • {:<28} [{}] ({})",
+            p.name.bold(),
+            p.squad.cyan(),
+            source_label
+        );
+    }
+}
+
+fn build_execution_plans(
+    squad_personas: &[&Persona],
+    branch_slug: &str,
+    bundle: &TaskContextBundle,
+    config: &ArgusConfig,
+) -> Vec<AgentExecutionPlan> {
+    squad_personas
+        .iter()
+        .map(|p| {
+            let session_name = runner::format_session_name(branch_slug, &p.name);
+            let task_payload = context::build_agent_prompt(bundle, &p.name);
+            let model = match p.model_tier {
+                ModelTier::Fast => Some(config.models.fast.clone()),
+                ModelTier::Standard => Some(config.models.standard.clone()),
+                ModelTier::Deep => Some(config.models.deep.clone()),
+            };
+
+            AgentExecutionPlan {
+                persona_name: p.name.clone(),
+                session_name,
+                system_prompt: p.system_prompt.clone(),
+                task_payload,
+                model,
+                tools: p.tools.clone(),
+            }
+        })
+        .collect()
+}
+
+fn save_audit_report(
+    synthesis: &AuditSynthesis,
+    bundle: &TaskContextBundle,
+    squad: &str,
+    current_dir: &Path,
+) {
+    let reports_dir = current_dir.join(".argus").join("reports");
+    let (sfd_title, sfd_path) = match bundle.sfd {
+        Some(ref sfd) => (sfd.title.as_deref(), sfd.path.to_str()),
+        None => (None, None),
+    };
+
+    let md_report =
+        synthesis::generate_markdown_report(synthesis, &bundle.branch, squad, sfd_title, sfd_path);
+
+    if let Ok(path) = synthesis::write_markdown_report(&md_report, &reports_dir) {
+        println!(
+            "{} Saved persistent audit report to: {}",
+            "✔".bold().green(),
+            path.display().to_string().cyan()
+        );
+    }
 }

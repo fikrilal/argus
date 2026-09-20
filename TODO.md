@@ -12,7 +12,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
 - [x] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
 - [x] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
-- [ ] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
+- [x] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
 - [ ] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
 
 ---
@@ -210,12 +210,12 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(synthesis): implement colorized terminal defect dashboard`
 
 ### Task 6.4: Markdown Report Generator (`src/synthesis/markdown.rs`)
-- [ ] Generate standalone Markdown report:
+- [x] Generate standalone Markdown report:
   - Executive summary, audit timestamp, git branch, commit SHA.
-  - Grouped findings table.
+  - Grouped findings table with failure scenarios and recommended code fixes.
   - Stored at `.argus/reports/YYYY-MM-DD-HHMMSS-audit.md`.
-- [ ] **Verification:** `cargo test synthesis::markdown` verifies file generation.
-- [ ] **Commit:** `feat(synthesis): implement persistent Markdown audit report generator`
+- [x] **Verification:** `cargo test synthesis::markdown` verifies file generation.
+- [x] **Commit:** `feat(synthesis): implement persistent Markdown audit report generator`
 
 ---
 
