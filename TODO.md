@@ -222,12 +222,12 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 7: Interactive CLI Commands & End-to-End Verification
 
 ### Task 7.1: Interactive Resume Command (`argus resume`)
-- [ ] Implement `src/cli/commands/resume.rs`:
-  - Discovers active Pi sessions matching `argus/<branch>/*`.
+- [x] Implement `src/cli/commands/resume.rs`:
+  - Discovers and resolves session names matching `argus/<branch>/*`.
   - Prompts user with interactive selection menu or accepts `--persona <name>`.
-  - Executes `pi --resume <session_name>` to drop user into interactive pair-programming.
-- [ ] **Verification:** `cargo run -- resume --help` works; session discovery verified.
-- [ ] **Commit:** `feat(cli): implement argus resume interactive session picker`
+  - Executes `pi --resume <session_name>` with inherited stdio.
+- [x] **Verification:** `cargo run -- resume --help` works; session resolution and unknown persona handling verified.
+- [x] **Commit:** `feat(cli): implement argus resume interactive session picker`
 
 ### Task 7.2: End-to-End `argus audit` Command (`src/cli/commands/audit.rs`)
 - [ ] Wire all components into unified pipeline:

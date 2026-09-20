@@ -120,6 +120,17 @@ fn test_cli_resume_help() {
 }
 
 #[test]
+fn test_cli_resume_unknown_persona_returns_error() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["resume", "--persona", "unknown-persona-xyz"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "Persona 'unknown-persona-xyz' not found in registry",
+        ));
+}
+
+#[test]
 fn test_cli_no_args_shows_usage_error() {
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
     cmd.assert()

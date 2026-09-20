@@ -45,14 +45,7 @@ async fn main() -> Result<()> {
             cli::commands::personas::run(&args, &persona_registry, &argus_config)?;
         }
         cli::Commands::Resume(args) => {
-            println!(
-                "{} (persona: {})",
-                "Resuming agent session:".bold().magenta(),
-                args.persona
-                    .as_deref()
-                    .unwrap_or("interactive picker")
-                    .yellow()
-            );
+            cli::commands::resume::run(&args, &persona_registry, &current_dir).await?;
         }
     }
 
