@@ -116,14 +116,16 @@ pub async fn run(
         synthesis.total_agents.to_string().bold()
     );
 
-    println!(
-        "{} Findings: {} ({} blockers, {} major, {} polish)",
-        "Audit Result:".bold().cyan(),
-        synthesis.total_findings().to_string().bold(),
-        synthesis.blocker_count.to_string().bold().red(),
-        synthesis.major_count.to_string().bold().yellow(),
-        synthesis.polish_count.to_string().bold().cyan(),
-    );
+    let dashboard = synthesis::render_terminal_dashboard(&synthesis);
+    print!("{dashboard}");
+
+    if !synthesis.is_passed() {
+        anyhow::bail!(
+            "Audit identified {} blocker(s) and {} major defect(s). Action required before QA handoff.",
+            synthesis.blocker_count,
+            synthesis.major_count
+        );
+    }
 
     Ok(())
 }

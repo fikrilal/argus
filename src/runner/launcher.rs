@@ -140,6 +140,7 @@ mod tests {
             let mut f = fs::File::create(&mock_script_path).unwrap();
             f.write_all(script.as_bytes()).unwrap();
             f.sync_all().unwrap();
+            drop(f);
         }
 
         #[cfg(unix)]
@@ -147,6 +148,8 @@ mod tests {
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(&mock_script_path, fs::Permissions::from_mode(0o755)).unwrap();
         }
+
+        tokio::time::sleep(std::time::Duration::from_millis(20)).await;
 
         let plan = AgentExecutionPlan {
             persona_name: "test-saboteur".to_string(),

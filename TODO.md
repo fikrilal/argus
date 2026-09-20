@@ -202,12 +202,12 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(synthesis): implement Lead Synthesizer aggregation and deduplication`
 
 ### Task 6.3: Terminal Dashboard Renderer (`src/synthesis/terminal.rs`)
-- [ ] Render colorized terminal summary:
+- [x] Render colorized terminal summary:
   - Red `[P0 - BLOCKER]`, Yellow `[P1 - MAJOR]`, Cyan `[P2 - POLISH]`.
   - File paths, lines, and violation descriptions.
   - Total counts and overall audit verdict (`PASSED` / `ACTION REQUIRED`).
-- [ ] **Verification:** Test terminal table formatting.
-- [ ] **Commit:** `feat(synthesis): implement colorized terminal defect dashboard`
+- [x] **Verification:** Test terminal table formatting.
+- [x] **Commit:** `feat(synthesis): implement colorized terminal defect dashboard`
 
 ### Task 6.4: Markdown Report Generator (`src/synthesis/markdown.rs`)
 - [ ] Generate standalone Markdown report:
