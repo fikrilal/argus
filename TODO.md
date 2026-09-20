@@ -11,7 +11,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 2: Git Engine & Session Identity** (Task 2.1)
 - [x] **Phase 3: Context & SFD Ingestion** (Tasks 3.1 – 3.2)
 - [x] **Phase 4: Two-Tier Persona Engine** (Tasks 4.1 – 4.4)
-- [ ] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
+- [x] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
 - [ ] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
 - [ ] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
 
@@ -157,22 +157,22 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Commit:** `feat(runner): implement async Pi subprocess launcher`
 
 ### Task 5.3: Tokio Concurrency Pool (`src/runner/pool.rs`)
-- [ ] Implement `SwarmPool`:
+- [x] Implement `SwarmPool`:
   - Manages Tokio `Arc<Semaphore>` for bounded parallelism (default: 4 concurrent agents).
   - Spawns tasks in parallel, collecting results asynchronously.
-  - Timeouts per agent session (default: 120s).
-- [ ] Graceful failure handling: if one agent fails, remaining agents continue.
-- [ ] Unit tests for pool throttling and timeout handling.
-- [ ] **Verification:** `cargo test runner::pool` passes.
-- [ ] **Commit:** `feat(runner): implement Tokio semaphore concurrency pool for swarm execution`
+  - Timeouts per agent session (default: 3 minutes).
+- [x] Graceful failure handling: if one agent fails, remaining agents continue.
+- [x] Unit tests for pool throttling and timeout handling.
+- [x] **Verification:** `cargo test runner::pool` passes.
+- [x] **Commit:** `feat(runner): implement Tokio semaphore concurrency pool for swarm execution`
 
 ### Task 5.4: Live Multi-Agent Progress UI (`src/runner/progress.rs`)
-- [ ] Integrate `indicatif::MultiProgress`:
+- [x] Integrate `indicatif::MultiProgress`:
   - Displays concurrent spinner lines for each active persona.
-  - Status updates: `Queued` $\to$ `Running` $\to$ `Completed (X violations)` / `Failed`.
-- [ ] Auto-fallback to clean log lines if running in non-TTY / CI environment.
-- [ ] **Verification:** Visual verification of multi-spinner execution.
-- [ ] **Commit:** `feat(runner): add live multi-spinner terminal progress UI`
+  - Status updates: `running evaluation...` $\to$ `✔ Completed in Xs` / `✖ Failed`.
+- [x] Auto-fallback to clean log lines if running in non-TTY / CI environment.
+- [x] **Verification:** Visual verification of multi-spinner execution.
+- [x] **Commit:** `feat(runner): add live multi-spinner terminal progress UI`
 
 ---
 

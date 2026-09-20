@@ -1,0 +1,105 @@
+use anyhow::Result;
+use colored::Colorize;
+use std::path::Path;
+
+use crate::cli::args::AuditArgs;
+use crate::config::ArgusConfig;
+use crate::context::{self, TaskContextBundle};
+use crate::git;
+use crate::persona::{ModelTier, PersonaRegistry, PersonaSource};
+use crate::runner::{self, AgentExecutionPlan, SwarmPool, SwarmProgressTracker};
+
+/// Executes the `argus audit` workflow.
+pub async fn run(
+    args: &AuditArgs,
+    config: &ArgusConfig,
+    registry: &PersonaRegistry,
+    current_dir: &Path,
+) -> Result<()> {
+    let active_branch = git::detect_current_branch(current_dir)
+        .await
+        .unwrap_or_else(|_| "main".to_string());
+    let branch_slug = git::slugify_branch_name(&active_branch);
+    let sfd_doc = context::load_sfd(args.sfd.as_deref(), config, current_dir)?;
+
+    let bundle = TaskContextBundle::new(
+        active_branch.clone(),
+        args.base.clone(),
+        args.staged,
+        sfd_doc,
+    );
+
+    let squad_personas = registry.get_squad(&args.squad, config)?;
+
+    println!(
+        "{} squad='{}' ({} agents, branch='{}' [slug='{}'], base='{}', concurrency={})",
+        "Running Argus audit for:".bold().cyan(),
+        args.squad.yellow(),
+        squad_personas.len().to_string().bold().green(),
+        bundle.branch.green(),
+        branch_slug.green(),
+        args.base.as_deref().unwrap_or("auto-detect").yellow(),
+        args.concurrency.to_string().yellow()
+    );
+
+    if let Some(ref sfd) = bundle.sfd {
+        println!(
+            "{} '{}' ({})",
+            "Active SFD:".bold().green(),
+            sfd.title.as_deref().unwrap_or("Untitled Spec").yellow(),
+            sfd.path.display().to_string().dimmed()
+        );
+    }
+
+    println!("{}", "Deploying agent squad:".bold().blue());
+    for p in &squad_personas {
+        let source_label = match p.source {
+            PersonaSource::Builtin => "builtin".dimmed(),
+            PersonaSource::ProjectOverride(_) => "override".yellow(),
+        };
+        println!(
+            "  • {:<28} [{}] ({})",
+            p.name.bold(),
+            p.squad.cyan(),
+            source_label
+        );
+    }
+
+    let plans: Vec<AgentExecutionPlan> = squad_personas
+        .iter()
+        .map(|p| {
+            let session_name = runner::format_session_name(&branch_slug, &p.name);
+            let task_payload = context::build_agent_prompt(&bundle, &p.name);
+            let model = match p.model_tier {
+                ModelTier::Fast => Some(config.models.fast.clone()),
+                ModelTier::Standard => Some(config.models.standard.clone()),
+                ModelTier::Deep => Some(config.models.deep.clone()),
+            };
+
+            AgentExecutionPlan {
+                persona_name: p.name.clone(),
+                session_name,
+                system_prompt: p.system_prompt.clone(),
+                task_payload,
+                model,
+                tools: p.tools.clone(),
+            }
+        })
+        .collect();
+
+    println!();
+    let tracker = SwarmProgressTracker::new();
+    let pool = SwarmPool::new(args.concurrency);
+
+    let results = pool.execute_all(plans, current_dir, Some(&tracker)).await?;
+
+    let success_count = results.iter().filter(|r| r.is_success()).count();
+    println!(
+        "\n{} Swarm execution completed: {}/{} agents succeeded.",
+        "✔".bold().green(),
+        success_count.to_string().bold().green(),
+        results.len().to_string().bold()
+    );
+
+    Ok(())
+}
