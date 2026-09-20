@@ -75,9 +75,7 @@ impl PersonaRegistry {
             for name in names {
                 let persona = self.get(name).ok_or_else(|| {
                     anyhow::anyhow!(
-                        "Squad '{}' references persona '{}', which is not registered in the registry",
-                        squad_name,
-                        name
+                        "Squad '{squad_name}' references persona '{name}', which is not registered in the registry"
                     )
                 })?;
                 resolved.push(persona);
@@ -163,7 +161,7 @@ mod tests {
         fs::create_dir_all(&personas_dir).expect("create dir");
 
         let override_file = personas_dir.join("stock-ledger-auditor.md");
-        let override_content = r#"---
+        let override_content = r"---
 name: stock-ledger-auditor
 title: Custom Kalbe Drift Ledger Auditor
 squad: state
@@ -172,7 +170,7 @@ tools: read, grep, find, ls, bash
 ---
 
 Customized prompt checking SimplidotInvoiceOutboxDao specifically.
-"#;
+";
         fs::write(&override_file, override_content).expect("write file");
 
         let registry = PersonaRegistry::load(dir.path()).expect("should load registry");
@@ -198,7 +196,7 @@ Customized prompt checking SimplidotInvoiceOutboxDao specifically.
         fs::create_dir_all(&personas_dir).expect("create dir");
 
         let custom_file = personas_dir.join("pci-compliance-sentinel.md");
-        let custom_content = r#"---
+        let custom_content = r"---
 name: pci-compliance-sentinel
 title: PCI-DSS Compliance Sentinel
 squad: security
@@ -207,7 +205,7 @@ tools: read, grep, find, ls, bash
 ---
 
 Audit payment card numbers.
-"#;
+";
         fs::write(&custom_file, custom_content).expect("write file");
 
         let registry = PersonaRegistry::load(dir.path()).expect("should load registry");

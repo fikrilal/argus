@@ -1,4 +1,5 @@
 use super::sfd::SfdDocument;
+use std::fmt::Write;
 
 /// Bundles the operational context needed to instruct an Argus subagent session.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,22 +36,25 @@ impl TaskContextBundle {
 pub fn build_agent_prompt(bundle: &TaskContextBundle, persona_name: &str) -> String {
     let mut prompt = String::new();
 
-    prompt.push_str(&format!(
-        "You are deployed as the Argus adversarial QA persona: '{persona_name}'.\n"
-    ));
-    prompt.push_str(&format!(
-        "Your mission is to evaluate code changes on Git branch: '{}'.\n\n",
+    let _ = writeln!(
+        prompt,
+        "You are deployed as the Argus adversarial QA persona: '{persona_name}'."
+    );
+    let _ = writeln!(
+        prompt,
+        "Your mission is to evaluate code changes on Git branch: '{}'.\n",
         bundle.branch
-    ));
+    );
 
     prompt.push_str("### 1. Code Inspection Instructions\n");
     if bundle.staged_only {
         prompt.push_str("Inspect the currently staged changes using your bash tool:\n");
         prompt.push_str("  `git diff --staged`\n");
     } else if let Some(ref base) = bundle.base_branch {
-        prompt.push_str(&format!(
-            "Inspect the changes on this branch compared to the base branch using your bash tool:\n  `git diff {base}...HEAD`\n"
-        ));
+        let _ = writeln!(
+            prompt,
+            "Inspect the changes on this branch compared to the base branch using your bash tool:\n  `git diff {base}...HEAD`"
+        );
     } else {
         prompt.push_str(
             "Inspect all uncommitted working tree changes using your bash tool:\n  `git status`\n  `git diff HEAD`\n",
@@ -60,12 +64,13 @@ pub fn build_agent_prompt(bundle: &TaskContextBundle, persona_name: &str) -> Str
 
     if let Some(ref sfd) = bundle.sfd {
         prompt.push_str("### 2. Specification Reference (Ground Truth)\n");
-        prompt.push_str(&format!(
-            "The active System Functional Design (SFD) specification is available at: '{}'\n",
+        let _ = writeln!(
+            prompt,
+            "The active System Functional Design (SFD) specification is available at: '{}'",
             sfd.path.display()
-        ));
+        );
         if let Some(ref title) = sfd.title {
-            prompt.push_str(&format!("Document Title: '{title}'\n"));
+            let _ = writeln!(prompt, "Document Title: '{title}'");
         }
         prompt.push_str("Use your `read` tool to inspect the business rules, acceptance criteria, and state transitions in this SFD.\n\n");
     }

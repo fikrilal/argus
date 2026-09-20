@@ -53,7 +53,7 @@ pub async fn detect_current_branch(repo_root: &Path) -> Result<String> {
             let sha = String::from_utf8_lossy(&sha_output.stdout)
                 .trim()
                 .to_string();
-            return Ok(format!("detached-{}", sha));
+            return Ok(format!("detached-{sha}"));
         }
 
         return Ok("detached".to_string());

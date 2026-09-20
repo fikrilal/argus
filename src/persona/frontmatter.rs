@@ -131,7 +131,7 @@ mod tests {
 
     #[test]
     fn test_parse_valid_persona_markdown() {
-        let raw = r#"---
+        let raw = r"---
 name: stock-ledger-auditor
 title: The Stock & Local Ledger Invariant Auditor
 squad: state
@@ -140,7 +140,7 @@ tools: read, grep, find, ls, bash
 ---
 
 You are an adversarial database and state machine auditor.
-"#;
+";
 
         let persona = parse_persona_markdown(raw, PersonaSource::Builtin).expect("should parse");
         assert_eq!(persona.name, "stock-ledger-auditor");
@@ -157,14 +157,14 @@ You are an adversarial database and state machine auditor.
 
     #[test]
     fn test_parse_persona_default_tools_and_tier() {
-        let raw = r#"---
+        let raw = r"---
 name: form-boundary-saboteur
 title: Form Boundary Saboteur
 squad: forms
 ---
 
 Attack every form boundary.
-"#;
+";
 
         let persona = parse_persona_markdown(raw, PersonaSource::Builtin).expect("should parse");
         assert_eq!(persona.model_tier, ModelTier::Standard);
@@ -173,13 +173,13 @@ Attack every form boundary.
 
     #[test]
     fn test_parse_persona_missing_name_returns_error() {
-        let raw = r#"---
+        let raw = r"---
 title: Form Boundary Saboteur
 squad: forms
 ---
 
 Body here.
-"#;
+";
 
         let result = parse_persona_markdown(raw, PersonaSource::Builtin);
         assert!(result.is_err());
@@ -193,12 +193,12 @@ Body here.
 
     #[test]
     fn test_parse_persona_missing_body_returns_error() {
-        let raw = r#"---
+        let raw = r"---
 name: my-persona
 title: My Persona
 squad: forms
 ---
-"#;
+";
 
         let result = parse_persona_markdown(raw, PersonaSource::Builtin);
         assert!(result.is_err());

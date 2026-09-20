@@ -140,21 +140,21 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 ## Phase 5: Native Pi Subprocess Runner & Concurrency Pool
 
 ### Task 5.1: Deterministic Session Naming (`src/runner/session.rs`)
-- [ ] Implement session name generator: `argus/<branch-slug>/<persona-slug>`.
-- [ ] Sanitize names for Pi compatibility and filesystem paths.
-- [ ] Unit tests for session name generation.
-- [ ] **Verification:** `cargo test runner::session` passes.
-- [ ] **Commit:** `feat(runner): implement deterministic Pi session naming`
+- [x] Implement session name generator: `argus/<branch-slug>/<persona-slug>`.
+- [x] Sanitize names for Pi compatibility and filesystem paths.
+- [x] Unit tests for session name generation.
+- [x] **Verification:** `cargo test runner::session` passes.
+- [x] **Commit:** `feat(runner): implement deterministic Pi session naming`
 
 ### Task 5.2: Pi Subprocess Launcher (`src/runner/launcher.rs`)
-- [ ] Implement `launch_agent_session()`:
+- [x] Implement `launch_agent()`:
   - Invokes `pi` binary with non-interactive mode:
     `pi -p --name <session_name> --append-system-prompt <prompt_file> "<payload>"`
   - Streams stdout and stderr asynchronously.
-  - Returns `AgentRunResult` (exit code, output string, duration, token usage).
-- [ ] Handle missing `pi` executable with clean diagnostic error message.
-- [ ] **Verification:** `cargo test runner::launcher` passes.
-- [ ] **Commit:** `feat(runner): implement async Pi subprocess launcher`
+  - Returns `AgentRunResult` (exit code, output string, duration).
+- [x] Handle missing `pi` executable with clean diagnostic error message.
+- [x] **Verification:** `cargo test runner::launcher` passes.
+- [x] **Commit:** `feat(runner): implement async Pi subprocess launcher`
 
 ### Task 5.3: Tokio Concurrency Pool (`src/runner/pool.rs`)
 - [ ] Implement `SwarmPool`:
