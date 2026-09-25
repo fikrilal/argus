@@ -71,7 +71,7 @@ pub struct AuditArgs {
     pub concurrency: usize,
 
     /// Maximum execution timeout in seconds allowed per subagent
-    #[arg(long, default_value = "300")]
+    #[arg(long, default_value = "600")]
     pub timeout: u64,
 }
 

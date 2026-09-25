@@ -51,7 +51,8 @@ fn test_audit_e2e_clean_pass() {
     let mock_pi = setup_mock_pi(dir.path(), "pass");
 
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
-    cmd.current_dir(dir.path())
+    cmd.env_remove("ARGUS_ACTIVE_AUDIT")
+        .current_dir(dir.path())
         .env("ARGUS_PI_BIN", &mock_pi)
         .args(["audit", "--squad", "forms", "--concurrency", "2"])
         .assert()
@@ -85,7 +86,8 @@ fn test_audit_e2e_defects_found_action_required() {
     let mock_pi = setup_mock_pi(dir.path(), "violation");
 
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
-    cmd.current_dir(dir.path())
+    cmd.env_remove("ARGUS_ACTIVE_AUDIT")
+        .current_dir(dir.path())
         .env("ARGUS_PI_BIN", &mock_pi)
         .args(["audit", "--squad", "forms", "--concurrency", "2"])
         .assert()
@@ -132,7 +134,8 @@ fn test_audit_e2e_with_sfd_flag() {
     .expect("write spec");
 
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
-    cmd.current_dir(dir.path())
+    cmd.env_remove("ARGUS_ACTIVE_AUDIT")
+        .current_dir(dir.path())
         .env("ARGUS_PI_BIN", &mock_pi)
         .args([
             "audit",

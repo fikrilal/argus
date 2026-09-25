@@ -24,7 +24,7 @@ impl SwarmPool {
     pub fn new(concurrency_limit: usize) -> Self {
         Self {
             concurrency_limit: concurrency_limit.max(1),
-            timeout_duration: Duration::from_mins(3),
+            timeout_duration: Duration::from_mins(10),
             pi_bin_override: None,
         }
     }
