@@ -67,22 +67,6 @@ pub fn render_terminal_dashboard(synthesis: &AuditSynthesis) -> String {
                 "Persona:".dimmed(),
                 finding.persona.cyan()
             );
-
-            if !finding.failure_scenario.is_empty() {
-                let _ = writeln!(
-                    out,
-                    "   {:<10} {}",
-                    "Scenario:".dimmed(),
-                    finding.failure_scenario
-                );
-            }
-
-            if let Some(ref fix) = finding.proposed_fix {
-                let _ = writeln!(out, "   {}:", "Recommended Fix".dimmed());
-                for line in fix.lines() {
-                    let _ = writeln!(out, "   {} {}", "│".green(), line.green());
-                }
-            }
         }
 
         if !synthesis.passed_personas.is_empty() {
@@ -153,6 +137,6 @@ mod tests {
         assert!(rendered.contains("ACTION REQUIRED"));
         assert!(rendered.contains("P0 - BLOCKER"));
         assert!(rendered.contains("simplidot_invoice_outbox_dao.dart:88"));
-        assert!(rendered.contains("await restoreStockMutation(id);"));
+        assert!(rendered.contains("stock-ledger-auditor"));
     }
 }

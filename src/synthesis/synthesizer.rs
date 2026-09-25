@@ -135,6 +135,8 @@ pub fn synthesize_reports(reports: &[AgentReport]) -> AuditSynthesis {
         .filter(|f| f.severity == Severity::P2Polish)
         .count();
 
+    passed_personas.sort();
+
     AuditSynthesis {
         findings,
         total_agents,

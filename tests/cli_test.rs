@@ -68,6 +68,33 @@ fn test_cli_audit_conflicts_full_and_base() {
 }
 
 #[test]
+fn test_cli_audit_conflicts_path_and_full() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--path", "src/cli", "--full"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
+fn test_cli_audit_conflicts_path_and_staged() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--path", "src/cli", "--staged"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
+fn test_cli_audit_conflicts_path_and_base() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--path", "src/cli", "--base", "main"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
 fn test_cli_init_help() {
     let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
     cmd.args(["init", "--help"])

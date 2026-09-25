@@ -96,9 +96,6 @@ fn test_audit_e2e_defects_found_action_required() {
         .stdout(predicate::str::contains("[P1 - MAJOR]"))
         .stdout(predicate::str::contains("add_customer_page.dart:242"))
         .stdout(predicate::str::contains(
-            "LengthLimitingTextInputFormatter(3)",
-        ))
-        .stdout(predicate::str::contains(
             "Saved persistent audit report to:",
         ))
         .stderr(predicate::str::contains(
@@ -119,6 +116,7 @@ fn test_audit_e2e_defects_found_action_required() {
     assert!(report_content.contains("**ACTION REQUIRED** (Defects Found)"));
     assert!(report_content.contains("`[P1 - MAJOR]`"));
     assert!(report_content.contains("add_customer_page.dart:242"));
+    assert!(report_content.contains("LengthLimitingTextInputFormatter(3)"));
 }
 
 #[test]

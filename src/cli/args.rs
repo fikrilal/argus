@@ -47,7 +47,7 @@ pub struct AuditArgs {
     pub squad: String,
 
     /// Target specific feature directory or file to audit
-    #[arg(short = 'p', long, value_name = "PATH")]
+    #[arg(short = 'p', long, value_name = "PATH", conflicts_with_all = ["base", "staged", "full"])]
     pub path: Option<PathBuf>,
 
     /// Path to the active System Functional Design (SFD) specification file in Markdown format
@@ -55,15 +55,15 @@ pub struct AuditArgs {
     pub sfd: Option<PathBuf>,
 
     /// The base Git branch or commit to diff against (e.g. origin/main, origin/development)
-    #[arg(short, long, conflicts_with_all = ["staged", "full"])]
+    #[arg(short, long, conflicts_with_all = ["staged", "full", "path"])]
     pub base: Option<String>,
 
     /// Audit only staged changes instead of the entire working tree
-    #[arg(long, conflicts_with_all = ["base", "full"])]
+    #[arg(long, conflicts_with_all = ["base", "full", "path"])]
     pub staged: bool,
 
     /// Audit the entire codebase across all source files instead of only diff changes
-    #[arg(long, conflicts_with_all = ["base", "staged"])]
+    #[arg(long, conflicts_with_all = ["base", "staged", "path"])]
     pub full: bool,
 
     /// Maximum number of subagents to execute concurrently
