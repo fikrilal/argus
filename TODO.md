@@ -15,6 +15,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
 - [x] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
 - [x] **Phase 8: Dogfooding Hardening & Self-Audit Remediation** (Tasks 8.1 – 8.3)
+- [x] **Phase 9: Auto-Persona Architect Initialization** (Task 9.1)
 
 ---
 
@@ -267,3 +268,15 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] Make `extract_field_value` character-boundary safe against asymmetric Unicode case-folding (German `ẞ`, Turkish `İ`, emojis).
 - [x] Provide stderr diagnostic warnings when markdown report persistence fails.
 - [x] Upgrade `test_project_map_drift` to bidirectional verification and remove ghost `oracles/` module.
+
+---
+
+## Phase 9: Auto-Persona Architect Initialization
+
+### Task 9.1: Auto-Persona Scaffolding (`argus init --auto`)
+- [x] Add `-a, --auto` option to `InitArgs`.
+- [x] Create embedded `persona-architect` persona in `src/runner/architect.rs` to analyze language, framework, database, and state boundaries.
+- [x] Implement live spinner and auto-profiling orchestration in `src/cli/commands/init.rs`.
+- [x] Register synthesized personas under squad `auto` in `.argus/config.yaml`.
+- [x] Hermetic integration test in `tests/init_test.rs` with mock `ARGUS_PI_BIN`.
+- [x] **Verification:** `cargo test init` passes cleanly; `./scripts/verify.sh` passes.

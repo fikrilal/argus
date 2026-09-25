@@ -82,8 +82,12 @@ pub struct InitArgs {
     #[arg(short, long)]
     pub force: bool,
 
+    /// Automatically inspect the codebase and synthesize tailored adversarial personas
+    #[arg(short, long)]
+    pub auto: bool,
+
     /// Target repository path to initialize
-    #[arg(short, long, value_name = "DIR", default_value = ".")]
+    #[arg(short = 't', long, value_name = "DIR", default_value = ".")]
     pub target_dir: PathBuf,
 }
 

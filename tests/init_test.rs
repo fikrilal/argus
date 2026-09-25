@@ -100,3 +100,82 @@ fn test_argus_init_overwrites_with_force() {
     let overwritten = fs::read_to_string(&config_file).expect("should read config");
     assert!(overwritten.contains("project: \"my-project\""));
 }
+
+#[test]
+fn test_argus_init_auto_bootstraps_custom_personas() {
+    let dir = tempdir().expect("should create temp dir");
+    let target_path = dir.path();
+
+    // Create a mock pi script that generates 2 tailored personas in .argus/personas/
+    let mock_pi_path = target_path.join("mock_pi.sh");
+    let script = r#"#!/usr/bin/env bash
+mkdir -p .argus/personas
+cat << 'EOF' > .argus/personas/sqlite-ledger-auditor.md
+---
+name: sqlite-ledger-auditor
+title: SQLite Offline Ledger Auditor
+squad: data
+model_tier: standard
+tools: read, grep, find, ls, bash
+---
+
+Audit SQLite transaction atomicity.
+EOF
+
+cat << 'EOF' > .argus/personas/bloc-state-auditor.md
+---
+name: bloc-state-auditor
+title: BLoC State Management Auditor
+squad: state
+model_tier: standard
+tools: read, grep, find, ls, bash
+---
+
+Audit stream subscription leaks.
+EOF
+
+echo "Synthesized 2 tailored personas successfully."
+exit 0
+"#;
+    fs::write(&mock_pi_path, script).expect("write mock script");
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&mock_pi_path, fs::Permissions::from_mode(0o755))
+            .expect("set permissions");
+    }
+
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.env_remove("ARGUS_ACTIVE_AUDIT")
+        .env("ARGUS_PI_BIN", &mock_pi_path)
+        .args([
+            "init",
+            "--auto",
+            "--target-dir",
+            target_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "Profiling codebase with Persona Architect",
+        ))
+        .stdout(predicate::str::contains(
+            "Persona Architect synthesized 2 tailored persona(s):",
+        ))
+        .stdout(predicate::str::contains("sqlite-ledger-auditor"))
+        .stdout(predicate::str::contains("bloc-state-auditor"))
+        .stdout(predicate::str::contains("Registered new squad 'auto' in"));
+
+    // Verify persona files exist on disk
+    let personas_dir = target_path.join(".argus").join("personas");
+    assert!(personas_dir.join("sqlite-ledger-auditor.md").is_file());
+    assert!(personas_dir.join("bloc-state-auditor.md").is_file());
+
+    // Verify config.yaml was updated with squad 'auto'
+    let config_file = target_path.join(".argus").join("config.yaml");
+    let config_content = fs::read_to_string(&config_file).expect("read config");
+    assert!(config_content.contains("auto:"));
+    assert!(config_content.contains("sqlite-ledger-auditor"));
+    assert!(config_content.contains("bloc-state-auditor"));
+}

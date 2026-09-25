@@ -102,6 +102,7 @@ fn test_cli_init_help() {
         .success()
         .stdout(predicate::str::contains("Initialize Argus configuration"))
         .stdout(predicate::str::contains("--force"))
+        .stdout(predicate::str::contains("--auto"))
         .stdout(predicate::str::contains("--target-dir"));
 }
 

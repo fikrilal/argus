@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
 
     match cli.command {
         cli::Commands::Init(args) => {
-            cli::commands::init::run(&args)?;
+            cli::commands::init::run(&args).await?;
         }
         cli::Commands::Audit(args) => {
             let argus_config = config::load_config(cli.config.as_deref(), &current_dir)?;
