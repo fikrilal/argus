@@ -1,0 +1,34 @@
+# Argus Project Configuration
+version: 1
+project: "argus"
+
+# Specification Document (SFD) settings
+sfd:
+  dir: ".argus/context/sfd"
+
+# Squad definitions mapping squad name to persona names
+squads:
+  argus:
+    - rust-safety-auditor
+    - tokio-concurrency-auditor
+    - cli-config-auditor
+    - architecture-boundary-auditor
+  forms:
+    - id-regulatory-sentinel
+    - form-boundary-saboteur
+    - cascade-dropdown-glitcher
+  state:
+    - stock-ledger-auditor
+    - orphan-cascade-hunter
+  sync:
+    - payload-pessimist
+    - sync-deadlock-guard
+    - hardware-sensor-adversary
+  spec:
+    - sfd-clause-detective
+    - rbac-identity-gatekeeper
+  all:
+    - rust-safety-auditor
+    - tokio-concurrency-auditor
+    - cli-config-auditor
+    - architecture-boundary-auditor

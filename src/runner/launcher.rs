@@ -54,7 +54,7 @@ impl AgentRunResult {
 /// Uses non-interactive mode (`pi -p`), setting the session name, appending the persona's
 /// system prompt via a temporary file, and passing the evaluation prompt.
 #[allow(dead_code)]
-pub async fn launch_agent(
+pub(crate) async fn launch_agent(
     plan: &AgentExecutionPlan,
     pi_bin_override: Option<&str>,
     working_dir: &Path,
@@ -64,17 +64,28 @@ pub async fn launch_agent(
         .or_else(|| pi_bin_override.map(ToString::to_string))
         .unwrap_or_else(|| "pi".to_string());
 
-    // Write system prompt to a temporary file so Pi can load it via --append-system-prompt
-    let mut prompt_file = NamedTempFile::new()
-        .with_context(|| "Failed to create temporary file for persona prompt")?;
-    prompt_file
-        .write_all(plan.system_prompt.as_bytes())
-        .with_context(|| "Failed to write persona prompt to temporary file")?;
-    prompt_file.flush()?;
+    // Write system prompt to a temporary file via spawn_blocking so Tokio worker threads are not stalled
+    let system_prompt = plan.system_prompt.clone();
+    let prompt_file = tokio::task::spawn_blocking(move || -> Result<NamedTempFile> {
+        let mut file = NamedTempFile::new()
+            .with_context(|| "Failed to create temporary file for persona prompt")?;
+        file.write_all(system_prompt.as_bytes())
+            .with_context(|| "Failed to write persona prompt to temporary file")?;
+        file.flush().with_context(|| {
+            format!(
+                "Failed to flush temporary persona prompt file at '{}'",
+                file.path().display()
+            )
+        })?;
+        Ok(file)
+    })
+    .await
+    .context("Failed to complete temporary persona prompt file task")??;
 
     let prompt_file_path = prompt_file.path().to_string_lossy().to_string();
 
     let mut cmd = Command::new(&pi_bin);
+    cmd.kill_on_drop(true);
     cmd.current_dir(working_dir);
     cmd.arg("-p"); // Non-interactive mode
     cmd.arg("--name").arg(&plan.session_name);

@@ -74,6 +74,5 @@ src/
 ├── context/                     # SFD & specification ingestion
 ├── persona/                     # Two-tier persona registry & discovery
 ├── runner/                      # Native Pi subprocess launcher & pool (tokio)
-├── synthesis/                   # Finding aggregator, ranker & report generators
-└── oracles/                     # .argus/oracles.yaml parser & validator
+└── synthesis/                   # Finding aggregator, ranker & report generators
 ```

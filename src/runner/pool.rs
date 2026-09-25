@@ -59,7 +59,7 @@ impl SwarmPool {
         let timeout_dur = self.timeout_duration;
         let pi_bin = self.pi_bin_override.clone();
 
-        let mut join_handles = Vec::with_capacity(plans.len());
+        let mut set = tokio::task::JoinSet::new();
 
         for plan in plans {
             let sem = Arc::clone(&semaphore);
@@ -67,7 +67,7 @@ impl SwarmPool {
             let bin = pi_bin.clone();
             let spinner = tracker.map(|t| t.start_agent_spinner(&plan.persona_name));
 
-            let handle = tokio::spawn(async move {
+            set.spawn(async move {
                 // Acquire concurrency permit
                 let permit_res = sem.acquire_owned().await;
                 if permit_res.is_err() {
@@ -129,13 +129,11 @@ impl SwarmPool {
                     }
                 }
             });
-
-            join_handles.push(handle);
         }
 
-        let mut results = Vec::with_capacity(join_handles.len());
-        for handle in join_handles {
-            match handle.await {
+        let mut results = Vec::with_capacity(set.len());
+        while let Some(res) = set.join_next().await {
+            match res {
                 Ok(result) => results.push(result),
                 Err(join_err) => {
                     results.push(AgentRunResult {

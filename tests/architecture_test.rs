@@ -309,10 +309,10 @@ fn test_no_unquarantined_println() {
     );
 }
 
-/// 6. Mechanical check: Project Map Drift Verification.
+/// 6. Mechanical check: Bidirectional Project Map Drift Verification.
 ///
 /// Ensures every module directory in `src/` is explicitly documented in `AGENTS.md`
-/// under `## Architecture Map`, so architectural documentation never drifts out of sync.
+/// under `## Architecture Map`, and every module documented in `AGENTS.md` exists on disk.
 #[test]
 fn test_project_map_drift() {
     let agents_md_path = Path::new("AGENTS.md");
@@ -325,6 +325,7 @@ fn test_project_map_drift() {
     let src_dir = Path::new("src");
 
     let entries = fs::read_dir(src_dir).expect("should read src/ directory");
+    let mut actual_dirs = std::collections::HashSet::new();
     let mut missing_from_agents_md = Vec::new();
 
     for entry in entries.filter_map(Result::ok) {
@@ -337,8 +338,9 @@ fn test_project_map_drift() {
             let token = format!("├── {dir_name}/");
             let alt_token = format!("└── {dir_name}/");
             if !content.contains(&token) && !content.contains(&alt_token) {
-                missing_from_agents_md.push(dir_name);
+                missing_from_agents_md.push(dir_name.clone());
             }
+            actual_dirs.insert(dir_name);
         }
     }
 
@@ -346,5 +348,39 @@ fn test_project_map_drift() {
         missing_from_agents_md.is_empty(),
         "Directories in src/ missing from AGENTS.md Architecture Map:\n{}",
         missing_from_agents_md.join("\n")
+    );
+
+    // Bidirectional check: ensure modules documented in AGENTS.md actually exist on disk
+    let mut missing_from_disk = Vec::new();
+    let mut in_arch_map = false;
+
+    for line in content.lines() {
+        if line.contains("## Architecture Map") {
+            in_arch_map = true;
+            continue;
+        }
+        if in_arch_map && line.starts_with("## ") {
+            break;
+        }
+        if in_arch_map {
+            let trimmed = line.trim();
+            let is_tree_entry = trimmed.starts_with("├── ") || trimmed.starts_with("└── ");
+            if is_tree_entry {
+                let mod_name = trimmed
+                    .split_once(' ')
+                    .and_then(|(_, rest)| rest.split_whitespace().next())
+                    .and_then(|token| token.strip_suffix('/'));
+
+                if let Some(missing_mod) = mod_name.filter(|name| !actual_dirs.contains(*name)) {
+                    missing_from_disk.push(missing_mod.to_string());
+                }
+            }
+        }
+    }
+
+    assert!(
+        missing_from_disk.is_empty(),
+        "Modules documented in AGENTS.md Architecture Map do not exist in src/:\n{}",
+        missing_from_disk.join("\n")
     );
 }

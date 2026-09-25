@@ -12,7 +12,7 @@ This document translates the application architecture into a repository layout, 
 - Strictly domain-driven modules inside `src/`.
 - No generic dumping grounds: `helper`, `helpers`, `manager`, and `utils` are strictly forbidden and enforced by `tests/architecture_test.rs`.
 - Clean unidirectional dependency flow:
-  `cli` $\to$ `synthesis` / `runner` / `context` $\to$ `persona` / `config` / `git` / `oracles`.
+  `cli` $\to$ `synthesis` / `runner` / `context` $\to$ `persona` / `config` / `git`.
 - Integration and architecture tests live in `tests/`.
 
 ## Repository Layout
@@ -56,8 +56,7 @@ argus/
     ├── context/                     # SFD & specification ingestion
     ├── persona/                     # Two-tier persona registry & discovery
     ├── runner/                      # Native Pi subprocess launcher & pool (tokio)
-    ├── synthesis/                   # Finding aggregator, ranker & report generators
-    └── oracles/                     # .argus/oracles.yaml parser & validator
+    └── synthesis/                   # Finding aggregator, ranker & report generators
 ```
 
 ## Module Ownership & Boundary Rules

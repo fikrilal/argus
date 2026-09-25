@@ -14,6 +14,7 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] **Phase 5: Native Pi Subprocess Runner & Concurrency Pool** (Tasks 5.1 – 5.4)
 - [x] **Phase 6: Lead Synthesis & Output Reporting** (Tasks 6.1 – 6.4)
 - [x] **Phase 7: Interactive CLI Commands & End-to-End Verification** (Tasks 7.1 – 7.3)
+- [x] **Phase 8: Dogfooding Hardening & Self-Audit Remediation** (Tasks 8.1 – 8.3)
 
 ---
 
@@ -243,3 +244,26 @@ Each task follows the strict execution discipline: **Execute $\to$ Review $\to$ 
 - [x] Verify session persistence in `~/.pi/agent/sessions/` and interactive resume capability.
 - [x] Document verification results in `docs/verification-report.md`.
 - [x] **Commit:** `docs: record initial field verification results on superapps codebase`
+
+---
+
+## Phase 8: Dogfooding Hardening & Self-Audit Remediation
+
+### Task 8.1: Concurrency and Subprocess Safety (`src/runner/`, `src/cli/commands/resume.rs`)
+- [x] Configure `cmd.kill_on_drop(true)` on child processes to prevent orphaned subagents on cancel/timeout.
+- [x] Migrate `SwarmPool::execute_all` to `tokio::task::JoinSet` for robust cancellation propagation.
+- [x] Convert interactive session resume stdin reading to async `tokio::io::AsyncBufReadExt`.
+- [x] Offload prompt file I/O to worker threads via `tokio::task::spawn_blocking`.
+- [x] Dynamic numeric bounds in selection prompt `[1-{} or name]`.
+
+### Task 8.2: CLI Scoping, Ancestor Traversal & Mutual Exclusion (`src/cli/`, `src/config/`, `src/main.rs`)
+- [x] Enforce Clap `conflicts_with` constraints across mutually exclusive audit flags (`--full`, `--staged`, `--base`).
+- [x] Implement subsystem/feature scoping (`--path <dir>`).
+- [x] Decouple subcommand initialization in `src/main.rs` so `init` runs without loading invalid configs.
+- [x] Add ancestor directory traversal for `.argus/config.yaml` discovery from subdirectories.
+- [x] Enforce `.argus` > `.swarm` priority and dynamic novel persona resolution for `--squad all`.
+
+### Task 8.3: UTF-8 Safety, Reporting Diagnostics & Architecture Integrity (`src/synthesis/`, `tests/`)
+- [x] Make `extract_field_value` character-boundary safe against asymmetric Unicode case-folding (German `ẞ`, Turkish `İ`, emojis).
+- [x] Provide stderr diagnostic warnings when markdown report persistence fails.
+- [x] Upgrade `test_project_map_drift` to bidirectional verification and remove ghost `oracles/` module.

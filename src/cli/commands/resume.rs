@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use colored::Colorize;
-use std::io::{self, BufRead, Write};
+use std::io::{self, Write};
 use std::path::Path;
 use tokio::process::Command;
 
@@ -84,13 +84,21 @@ pub async fn run(args: &ResumeArgs, registry: &PersonaRegistry, current_dir: &Pa
             println!("  [{num:>2}] {:<28} [{}]", p.name.bold(), p.squad.cyan());
         }
 
-        print!("\n{}", "Select persona [1-12 or name]: ".bold().yellow());
-        io::stdout().flush()?;
+        print!(
+            "\n{}",
+            format!("Select persona [1-{} or name]: ", all.len())
+                .bold()
+                .yellow()
+        );
+        io::stdout()
+            .flush()
+            .context("Failed to flush stdout prompt during interactive session resume")?;
 
         let mut user_input = String::new();
-        let stdin = io::stdin();
-        let mut handle = stdin.lock();
-        handle.read_line(&mut user_input)?;
+        let mut reader = tokio::io::BufReader::new(tokio::io::stdin());
+        tokio::io::AsyncBufReadExt::read_line(&mut reader, &mut user_input)
+            .await
+            .context("Failed to read user selection from stdin during interactive resume")?;
 
         resolve_resume_session_name(args, &active_branch_slug, registry, Some(&user_input))?
     };

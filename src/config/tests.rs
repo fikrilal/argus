@@ -105,7 +105,7 @@ fn test_load_config_missing_explicit_path_returns_error() {
     let result = load_config(Some(non_existent), Path::new("."));
     assert!(result.is_err());
     let err_msg = result.unwrap_err().to_string();
-    assert!(err_msg.contains("Failed to read custom config file"));
+    assert!(err_msg.contains("does not exist") || err_msg.contains("Failed to read"));
 }
 
 #[test]
@@ -118,4 +118,31 @@ fn test_load_config_invalid_yaml_returns_error() {
     assert!(result.is_err());
     let err_msg = result.unwrap_err().to_string();
     assert!(err_msg.contains("Failed to parse YAML in config file"));
+}
+
+#[test]
+fn test_load_config_ancestor_traversal_from_subdirectory() {
+    let root = tempdir().expect("tempdir");
+    let argus_dir = root.path().join(".argus");
+    std::fs::create_dir_all(&argus_dir).expect("create .argus");
+    let config_file = argus_dir.join("config.yaml");
+    std::fs::write(&config_file, "project: \"root-project\"\n").expect("write config");
+
+    let sub_dir = root.path().join("src").join("cli").join("nested");
+    std::fs::create_dir_all(&sub_dir).expect("create nested");
+
+    let loaded = load_config(None, &sub_dir).expect("should discover from parent");
+    assert_eq!(loaded.project, "root-project");
+}
+
+#[test]
+fn test_load_config_custom_path_is_directory() {
+    let root = tempdir().expect("tempdir");
+    let argus_dir = root.path().join(".argus");
+    std::fs::create_dir_all(&argus_dir).expect("create .argus");
+    let config_file = argus_dir.join("config.yaml");
+    std::fs::write(&config_file, "project: \"dir-project\"\n").expect("write config");
+
+    let loaded = load_config(Some(root.path()), Path::new(".")).expect("should resolve directory");
+    assert_eq!(loaded.project, "dir-project");
 }

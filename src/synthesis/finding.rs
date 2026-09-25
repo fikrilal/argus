@@ -219,17 +219,39 @@ fn parse_single_violation_block(persona_name: &str, text: &str) -> Option<Findin
 }
 
 fn extract_field_value(line: &str, field_key: &str) -> Option<String> {
-    let lower_line = line.to_lowercase();
     let lower_key = field_key.to_lowercase();
+    for (byte_idx, _) in line.char_indices() {
+        let candidate = &line[byte_idx..];
+        // Fast path for ASCII field keys: avoids heap allocation and guarantees character boundary safety
+        if candidate.len() >= field_key.len()
+            && candidate.is_char_boundary(field_key.len())
+            && candidate[..field_key.len()].eq_ignore_ascii_case(field_key)
+        {
+            let after = &candidate[field_key.len()..];
+            let cleaned = after
+                .trim_start_matches('*')
+                .trim_start_matches(':')
+                .trim_start_matches('*')
+                .trim();
+            return Some(cleaned.to_string());
+        }
 
-    if let Some(idx) = lower_line.find(&lower_key) {
-        let after = &line[idx + field_key.len()..];
-        let cleaned = after
-            .trim_start_matches('*')
-            .trim_start_matches(':')
-            .trim_start_matches('*')
-            .trim();
-        return Some(cleaned.to_string());
+        // Safe Unicode fallback path for non-ASCII field keys
+        if candidate.to_lowercase().starts_with(&lower_key) {
+            let mut char_indices = candidate.char_indices();
+            let mut key_chars = lower_key.chars();
+            while key_chars.next().is_some() {
+                char_indices.next();
+            }
+            let end_offset = char_indices.next().map_or(candidate.len(), |(idx, _)| idx);
+            let after = &candidate[end_offset..];
+            let cleaned = after
+                .trim_start_matches('*')
+                .trim_start_matches(':')
+                .trim_start_matches('*')
+                .trim();
+            return Some(cleaned.to_string());
+        }
     }
 
     None
@@ -389,5 +411,27 @@ await restoreStockMutation(invoiceId);
         assert_eq!(findings[0].line_number, Some(10));
         assert_eq!(findings[1].file_path, PathBuf::from("lib/b.dart"));
         assert_eq!(findings[1].line_number, Some(20));
+    }
+
+    #[test]
+    fn test_extract_field_value_unicode_asymmetric_case_folding() {
+        // German capital sharp S 'ẞ' (3 bytes in UTF-8) case-folds to lowercase 'ß' (2 bytes in UTF-8)
+        let line_with_eszett = "- **GROßER FEHLER** - **Target:** `src/models/user.rs:42`";
+        let target = extract_field_value(line_with_eszett, "Target:");
+        assert_eq!(target, Some("`src/models/user.rs:42`".to_string()));
+
+        // Turkish capital I with dot 'İ' (2 bytes) case-folds to 'i\u{307}' (3 bytes)
+        let line_with_turkish = "İSTANBUL PROJESİ - **Issue:** Critical validation bypass";
+        let issue = extract_field_value(line_with_turkish, "Issue:");
+        assert_eq!(issue, Some("Critical validation bypass".to_string()));
+
+        // Multi-byte Unicode emojis
+        let line_with_emojis =
+            "🔍 🎯 ⚠️ - **Failure Scenario:** Buffer overflow occurs on negative inputs";
+        let scenario = extract_field_value(line_with_emojis, "Failure Scenario:");
+        assert_eq!(
+            scenario,
+            Some("Buffer overflow occurs on negative inputs".to_string())
+        );
     }
 }

@@ -13,22 +13,42 @@ const CONFIG_CANDIDATES: &[&str] = &[
 /// Discovers and loads the Argus configuration.
 ///
 /// If `custom_path` is specified:
+/// - If `path` is a directory, resolves candidate config within that directory.
 /// - Loads strictly from that path, returning an error if it does not exist or fails to parse.
 ///
 /// If `custom_path` is `None`:
-/// - Searches candidate paths in `start_dir`.
+/// - Searches candidate paths in `start_dir` and its ancestors.
 /// - If a configuration file is found, it is parsed and returned.
 /// - If no configuration file is found, returns [`ArgusConfig::default()`].
 pub fn load_config(custom_path: Option<&Path>, start_dir: &Path) -> Result<ArgusConfig> {
     if let Some(path) = custom_path {
-        let content = std::fs::read_to_string(path).with_context(|| {
-            format!("Failed to read custom config file at '{}'", path.display())
+        let file_path = if path.is_dir() {
+            find_config_in_dir(path).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "Custom config path '{}' is a directory, but no candidate config file (.argus/config.yaml, etc.) was found within it",
+                    path.display()
+                )
+            })?
+        } else if !path.is_file() {
+            anyhow::bail!(
+                "Custom config file does not exist or is not a regular file at '{}'",
+                path.display()
+            );
+        } else {
+            path.to_path_buf()
+        };
+
+        let content = std::fs::read_to_string(&file_path).with_context(|| {
+            format!(
+                "Failed to read custom config file at '{}'",
+                file_path.display()
+            )
         })?;
 
         let config: ArgusConfig = serde_yaml::from_str(&content).with_context(|| {
             format!(
                 "Failed to parse YAML in config file at '{}'",
-                path.display()
+                file_path.display()
             )
         })?;
 
@@ -56,10 +76,19 @@ pub fn load_config(custom_path: Option<&Path>, start_dir: &Path) -> Result<Argus
     Ok(ArgusConfig::default())
 }
 
-/// Searches `start_dir` for a known configuration file candidate.
+/// Searches `start_dir` and its parent directories for a known configuration file candidate.
 pub fn find_config_file(start_dir: &Path) -> Option<PathBuf> {
+    for dir in start_dir.ancestors() {
+        if let Some(path) = find_config_in_dir(dir) {
+            return Some(path);
+        }
+    }
+    None
+}
+
+fn find_config_in_dir(dir: &Path) -> Option<PathBuf> {
     for candidate in CONFIG_CANDIDATES {
-        let path = start_dir.join(candidate);
+        let path = dir.join(candidate);
         if path.is_file() {
             return Some(path);
         }

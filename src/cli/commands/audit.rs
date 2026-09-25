@@ -27,6 +27,8 @@ pub async fn run(
         active_branch.clone(),
         args.base.clone(),
         args.staged,
+        args.full,
+        args.path.clone(),
         sfd_doc,
     );
 
@@ -106,14 +108,24 @@ fn print_audit_header(
     branch_slug: &str,
     squad_personas: &[&Persona],
 ) {
+    let mode_desc = if let Some(ref p) = args.path {
+        format!("path='{}'", p.display())
+    } else if args.full {
+        "full-codebase".to_string()
+    } else if args.staged {
+        "staged-only".to_string()
+    } else {
+        format!("base='{}'", args.base.as_deref().unwrap_or("working-tree"))
+    };
+
     println!(
-        "{} squad='{}' ({} agents, branch='{}' [slug='{}'], base='{}', concurrency={})",
+        "{} squad='{}' ({} agents, branch='{}' [slug='{}'], {}, concurrency={})",
         "Running Argus audit for:".bold().cyan(),
         args.squad.yellow(),
         squad_personas.len().to_string().bold().green(),
         bundle.branch.green(),
         branch_slug.green(),
-        args.base.as_deref().unwrap_or("auto-detect").yellow(),
+        mode_desc.yellow(),
         args.concurrency.to_string().yellow()
     );
 
@@ -185,11 +197,20 @@ fn save_audit_report(
     let md_report =
         synthesis::generate_markdown_report(synthesis, &bundle.branch, squad, sfd_title, sfd_path);
 
-    if let Ok(path) = synthesis::write_markdown_report(&md_report, &reports_dir) {
-        println!(
-            "{} Saved persistent audit report to: {}",
-            "✔".bold().green(),
-            path.display().to_string().cyan()
-        );
+    match synthesis::write_markdown_report(&md_report, &reports_dir) {
+        Ok(path) => {
+            println!(
+                "{} Saved persistent audit report to: {}",
+                "✔".bold().green(),
+                path.display().to_string().cyan()
+            );
+        }
+        Err(err) => {
+            eprintln!(
+                "{} Failed to write persistent audit report to '{}': {err:#}",
+                "⚠".bold().yellow(),
+                reports_dir.display()
+            );
+        }
     }
 }

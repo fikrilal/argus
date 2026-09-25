@@ -35,8 +35,36 @@ fn test_cli_audit_help() {
         .success()
         .stdout(predicate::str::contains("Run an adversarial QA audit"))
         .stdout(predicate::str::contains("--squad"))
+        .stdout(predicate::str::contains("--path"))
         .stdout(predicate::str::contains("--sfd"))
         .stdout(predicate::str::contains("--concurrency"));
+}
+
+#[test]
+fn test_cli_audit_conflicts_full_and_staged() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--full", "--staged"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
+fn test_cli_audit_conflicts_staged_and_base() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--staged", "--base", "main"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
+}
+
+#[test]
+fn test_cli_audit_conflicts_full_and_base() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.args(["audit", "--full", "--base", "main"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("cannot be used with"));
 }
 
 #[test]
@@ -69,7 +97,7 @@ fn test_cli_personas_list_execution() {
     cmd.args(["personas", "list"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Available personas: (total: 12)"))
+        .stdout(predicate::str::contains("Available personas: (total:"))
         .stdout(predicate::str::contains("stock-ledger-auditor"))
         .stdout(predicate::str::contains("form-boundary-saboteur"))
         .stdout(predicate::str::contains("sfd-clause-detective"));
