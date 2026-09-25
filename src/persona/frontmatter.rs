@@ -46,12 +46,19 @@ pub struct Persona {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum ToolsConfig {
+    List(Vec<String>),
+    CommaSeparated(String),
+}
+
+#[derive(Debug, Deserialize)]
 struct RawFrontmatter {
     name: Option<String>,
     title: Option<String>,
     squad: Option<String>,
     model_tier: Option<ModelTier>,
-    tools: Option<String>,
+    tools: Option<ToolsConfig>,
 }
 
 /// Parses a Markdown document with YAML frontmatter into a validated [`Persona`].
@@ -91,20 +98,32 @@ pub fn parse_persona_markdown(raw_markdown: &str, source: PersonaSource) -> Resu
 
     let model_tier = raw.model_tier.unwrap_or_default();
 
-    let tools = if let Some(tools_str) = raw.tools {
-        tools_str
-            .split(',')
-            .map(|t| t.trim().to_string())
-            .filter(|t| !t.is_empty())
-            .collect()
-    } else {
-        vec![
-            "read".to_string(),
-            "grep".to_string(),
-            "find".to_string(),
-            "ls".to_string(),
-            "bash".to_string(),
-        ]
+    let tools = match raw.tools {
+        Some(ToolsConfig::List(list)) => {
+            let cleaned: Vec<String> = list
+                .into_iter()
+                .map(|t| t.trim().to_string())
+                .filter(|t| !t.is_empty())
+                .collect();
+            if cleaned.is_empty() {
+                default_tools()
+            } else {
+                cleaned
+            }
+        }
+        Some(ToolsConfig::CommaSeparated(tools_str)) => {
+            let cleaned: Vec<String> = tools_str
+                .split(',')
+                .map(|t| t.trim().to_string())
+                .filter(|t| !t.is_empty())
+                .collect();
+            if cleaned.is_empty() {
+                default_tools()
+            } else {
+                cleaned
+            }
+        }
+        None => default_tools(),
     };
 
     let system_prompt = result.content.trim().to_string();
@@ -121,6 +140,16 @@ pub fn parse_persona_markdown(raw_markdown: &str, source: PersonaSource) -> Resu
         system_prompt,
         source,
     })
+}
+
+fn default_tools() -> Vec<String> {
+    vec![
+        "read".to_string(),
+        "grep".to_string(),
+        "find".to_string(),
+        "ls".to_string(),
+        "bash".to_string(),
+    ]
 }
 
 #[cfg(test)]
@@ -169,6 +198,28 @@ Attack every form boundary.
         let persona = parse_persona_markdown(raw, PersonaSource::Builtin).expect("should parse");
         assert_eq!(persona.model_tier, ModelTier::Standard);
         assert_eq!(persona.tools, &["read", "grep", "find", "ls", "bash"]);
+    }
+
+    #[test]
+    fn test_parse_persona_tools_as_yaml_sequence() {
+        let raw = r"---
+name: payload-pessimist
+title: API Payload Pessimist
+squad: sync
+model_tier: standard
+tools:
+  - read
+  - grep
+  - find
+  - ls
+---
+
+Attack schema violations.
+";
+
+        let persona = parse_persona_markdown(raw, PersonaSource::Builtin).expect("should parse");
+        assert_eq!(persona.name, "payload-pessimist");
+        assert_eq!(persona.tools, &["read", "grep", "find", "ls"]);
     }
 
     #[test]
