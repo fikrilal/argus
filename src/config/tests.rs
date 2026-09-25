@@ -146,3 +146,31 @@ fn test_load_config_custom_path_is_directory() {
     let loaded = load_config(Some(root.path()), Path::new(".")).expect("should resolve directory");
     assert_eq!(loaded.project, "dir-project");
 }
+
+#[test]
+fn test_load_config_custom_path_pointing_directly_to_argus_dir() {
+    let root = tempdir().expect("tempdir");
+    let argus_dir = root.path().join(".argus");
+    std::fs::create_dir_all(&argus_dir).expect("create .argus");
+    let config_file = argus_dir.join("config.yaml");
+    std::fs::write(&config_file, "project: \"direct-argus-folder\"\n").expect("write config");
+
+    // Pass relative path ".argus" directly anchored to root.path()
+    let loaded = load_config(Some(Path::new(".argus")), root.path())
+        .expect("should resolve config directly within .argus folder");
+    assert_eq!(loaded.project, "direct-argus-folder");
+}
+
+#[test]
+fn test_load_config_relative_custom_path_anchored_to_start_dir() {
+    let root = tempdir().expect("tempdir");
+    let sub = root.path().join("configs");
+    std::fs::create_dir_all(&sub).expect("create configs folder");
+    let custom_file = sub.join("special.yaml");
+    std::fs::write(&custom_file, "project: \"anchored-relative\"\n").expect("write custom config");
+
+    // Pass relative path "configs/special.yaml" with start_dir = root.path()
+    let loaded = load_config(Some(Path::new("configs/special.yaml")), root.path())
+        .expect("should resolve relative custom path against start_dir");
+    assert_eq!(loaded.project, "anchored-relative");
+}

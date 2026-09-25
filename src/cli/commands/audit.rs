@@ -17,7 +17,7 @@ pub async fn run(
     registry: &PersonaRegistry,
     current_dir: &Path,
 ) -> Result<()> {
-    if is_recursive_audit() {
+    if runner::is_recursive_audit() {
         anyhow::bail!(
             "Recursive audit blocked: cannot run 'argus audit' from within an active Argus agent session."
         );
@@ -214,37 +214,4 @@ fn save_audit_report(
             );
         }
     }
-}
-
-fn is_recursive_audit() -> bool {
-    if std::env::var("ARGUS_ACTIVE_AUDIT").is_ok() {
-        return true;
-    }
-
-    #[cfg(unix)]
-    {
-        let mut pid = std::process::id();
-        while pid > 1 {
-            if let Ok(stat) = std::fs::read_to_string(format!("/proc/{pid}/stat")) {
-                let parts: Vec<&str> = stat.split_whitespace().collect();
-                if parts.len() > 3
-                    && let Ok(ppid) = parts[3].parse::<u32>()
-                {
-                    if ppid <= 1 {
-                        break;
-                    }
-                    if let Ok(comm) = std::fs::read_to_string(format!("/proc/{ppid}/comm"))
-                        && comm.trim() == "argus"
-                    {
-                        return true;
-                    }
-                    pid = ppid;
-                    continue;
-                }
-            }
-            break;
-        }
-    }
-
-    false
 }

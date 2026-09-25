@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 use colored::Colorize;
 use std::io::{self, Write};
 use std::path::Path;
-use tokio::process::Command;
 
 use crate::cli::args::ResumeArgs;
 use crate::git;
@@ -112,22 +111,7 @@ pub async fn run(args: &ResumeArgs, registry: &PersonaRegistry, current_dir: &Pa
         pi_bin.dimmed()
     );
 
-    let mut cmd = Command::new(&pi_bin);
-    cmd.current_dir(current_dir);
-    cmd.arg("--resume").arg(&session_name);
-
-    let status = match cmd.status().await {
-        Ok(s) => s,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => {
-            anyhow::bail!(
-                "The '{pi_bin}' binary was not found on PATH. Please ensure Pi (https://pi.dev) is installed and available in your environment."
-            );
-        }
-        Err(e) => {
-            return Err(e)
-                .with_context(|| format!("Failed to spawn '{pi_bin} --resume {session_name}'"));
-        }
-    };
+    let status = runner::resume_interactive_session(&session_name, current_dir).await?;
 
     if !status.success() {
         let code = status.code().unwrap_or(-1);

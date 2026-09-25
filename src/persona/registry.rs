@@ -28,12 +28,19 @@ impl PersonaRegistry {
             map.insert(persona.name.clone(), persona);
         }
 
-        // 2. Scan project candidate directories for overrides and extensions.
+        // 2. Scan project candidate directories for overrides and extensions across project ancestors.
         // Stop at the first candidate directory found to establish clean priority (.argus > .swarm).
-        for candidate in PERSONA_CANDIDATE_DIRS {
-            let candidate_dir = project_root.join(candidate);
-            if candidate_dir.is_dir() {
-                load_personas_from_dir(&candidate_dir, &mut map)?;
+        for dir in project_root.ancestors() {
+            let mut found = false;
+            for candidate in PERSONA_CANDIDATE_DIRS {
+                let candidate_dir = dir.join(candidate);
+                if candidate_dir.is_dir() {
+                    load_personas_from_dir(&candidate_dir, &mut map)?;
+                    found = true;
+                    break;
+                }
+            }
+            if found {
                 break;
             }
         }
@@ -74,9 +81,20 @@ impl PersonaRegistry {
     pub fn get_squad(&self, squad_name: &str, config: &ArgusConfig) -> Result<Vec<&Persona>> {
         if squad_name == "all" {
             if let Some(names) = config.squads.get("all") {
-                // If custom personas were registered beyond the 12 builtins and the squad is at default count,
-                // dynamically return all worker personas so custom additions are not silently omitted.
-                if self.len() > 12 && names.len() == 11 {
+                let default_config = ArgusConfig::default();
+                let is_default_all_squad = default_config
+                    .squads
+                    .get("all")
+                    .is_some_and(|default_names| default_names == names);
+
+                let has_custom_personas = self
+                    .all()
+                    .iter()
+                    .any(|p| matches!(p.source, PersonaSource::ProjectOverride(_)));
+
+                // If using the default uncustomized "all" squad and project custom personas exist,
+                // dynamically return all non-synthesis worker personas so custom additions are included.
+                if is_default_all_squad && has_custom_personas {
                     let workers: Vec<&Persona> = self
                         .all()
                         .into_iter()
@@ -313,5 +331,57 @@ Audit payment card numbers.
         let names: Vec<&str> = all_squad.iter().map(|p| p.name.as_str()).collect();
         assert!(names.contains(&"novel-checker"));
         assert_eq!(all_squad.len(), 12); // 11 default workers + 1 novel worker
+    }
+
+    #[test]
+    fn test_registry_load_ancestor_traversal_from_subdirectory() {
+        let dir = tempdir().expect("tempdir");
+        let personas_dir = dir.path().join(".argus/personas");
+        fs::create_dir_all(&personas_dir).expect("create dir");
+
+        let custom_file = personas_dir.join("sub-test-auditor.md");
+        fs::write(
+            &custom_file,
+            "---\nname: sub-test-auditor\ntitle: Sub Auditor\nsquad: custom\nmodel_tier: standard\ntools: read\n---\nPrompt.\n",
+        ).expect("write file");
+
+        let sub_dir = dir.path().join("src").join("cli").join("nested");
+        fs::create_dir_all(&sub_dir).expect("create nested");
+
+        let registry = PersonaRegistry::load(&sub_dir).expect("load registry from subdirectory");
+        assert_eq!(registry.len(), 13);
+        assert!(registry.get("sub-test-auditor").is_some());
+    }
+
+    #[test]
+    fn test_registry_squad_all_respects_explicit_user_override() {
+        let dir = tempdir().expect("tempdir");
+        let personas_dir = dir.path().join(".argus/personas");
+        fs::create_dir_all(&personas_dir).expect("create dir");
+
+        let custom_file = personas_dir.join("novel-agent.md");
+        fs::write(
+            &custom_file,
+            "---\nname: novel-agent\ntitle: Novel Agent\nsquad: custom\nmodel_tier: standard\ntools: read\n---\nPrompt.\n",
+        ).expect("write file");
+
+        let registry = PersonaRegistry::load(dir.path()).expect("load registry");
+
+        // User explicitly customized squad "all" to only 2 specific personas
+        let mut config = ArgusConfig::default();
+        config.squads.insert(
+            "all".to_string(),
+            vec![
+                "stock-ledger-auditor".to_string(),
+                "orphan-cascade-hunter".to_string(),
+            ],
+        );
+
+        let squad = registry
+            .get_squad("all", &config)
+            .expect("get customized squad all");
+        assert_eq!(squad.len(), 2);
+        assert_eq!(squad[0].name, "stock-ledger-auditor");
+        assert_eq!(squad[1].name, "orphan-cascade-hunter");
     }
 }

@@ -75,7 +75,9 @@ pub fn synthesize_reports(reports: &[AgentReport]) -> AuditSynthesis {
         let parsed = parse_agent_findings(&report.persona_name, &report.raw_output);
 
         if parsed.is_empty() {
-            passed_personas.push(report.persona_name.clone());
+            if has_pass_confirmation(&report.raw_output) {
+                passed_personas.push(report.persona_name.clone());
+            }
             continue;
         }
 
@@ -146,6 +148,14 @@ pub fn synthesize_reports(reports: &[AgentReport]) -> AuditSynthesis {
         major_count,
         polish_count,
     }
+}
+
+fn has_pass_confirmation(output: &str) -> bool {
+    let upper = output.to_uppercase();
+    upper.contains("[STATUS: PASS]")
+        || upper.contains("[STATUS:PASS]")
+        || upper.contains("STATUS: PASS")
+        || upper.contains("STATUS:PASS")
 }
 
 #[cfg(test)]
@@ -232,5 +242,23 @@ mod tests {
         assert_eq!(synthesis.findings.len(), 0);
         assert_eq!(synthesis.passed_personas.len(), 2);
         assert!(synthesis.is_passed());
+    }
+
+    #[test]
+    fn test_synthesize_reports_rejects_unconfirmed_pass() {
+        let unconfirmed = AgentReport {
+            persona_name: "unconfirmed-agent".to_string(),
+            raw_output: "Random commentary or unparseable output without pass tag".to_string(),
+            is_success: true,
+        };
+        let confirmed = AgentReport {
+            persona_name: "confirmed-agent".to_string(),
+            raw_output: "[STATUS: PASS] All requirements verified.".to_string(),
+            is_success: true,
+        };
+
+        let synthesis = synthesize_reports(&[unconfirmed, confirmed]);
+        assert_eq!(synthesis.findings.len(), 0);
+        assert_eq!(synthesis.passed_personas, &["confirmed-agent"]);
     }
 }

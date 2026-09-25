@@ -1,3 +1,8 @@
+use anyhow::{Context, Result};
+use std::path::Path;
+use std::process::ExitStatus;
+use tokio::process::Command;
+
 /// Generates a deterministic Pi session name for an Argus agent run.
 ///
 /// Convention:
@@ -20,6 +25,33 @@ pub fn format_session_name(branch_slug: &str, persona_slug: &str) -> String {
     };
 
     format!("argus/{clean_branch}/{clean_persona}")
+}
+
+/// Launches an interactive `pi --resume <session_name>` subprocess handing stdio over to the user.
+pub async fn resume_interactive_session(
+    session_name: &str,
+    current_dir: &Path,
+) -> Result<ExitStatus> {
+    let pi_bin = std::env::var("ARGUS_PI_BIN").unwrap_or_else(|_| "pi".to_string());
+
+    let mut cmd = Command::new(&pi_bin);
+    cmd.current_dir(current_dir);
+    cmd.arg("--resume").arg(session_name);
+
+    let status = match cmd.status().await {
+        Ok(s) => s,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            anyhow::bail!(
+                "The '{pi_bin}' binary was not found on PATH. Please ensure Pi (https://pi.dev) is installed and available in your environment."
+            );
+        }
+        Err(e) => {
+            return Err(e)
+                .with_context(|| format!("Failed to spawn '{pi_bin} --resume {session_name}'"));
+        }
+    };
+
+    Ok(status)
 }
 
 #[cfg(test)]
