@@ -9,7 +9,6 @@ pub fn render_terminal_dashboard(synthesis: &AuditSynthesis) -> String {
     let mut out = String::new();
 
     let divider = "═".repeat(64);
-    let thin_divider = "─".repeat(64);
 
     let _ = writeln!(out, "\n{}", divider.dimmed());
 
@@ -22,11 +21,18 @@ pub fn render_terminal_dashboard(synthesis: &AuditSynthesis) -> String {
                 .bold()
                 .green()
         );
-        let _ = writeln!(out, "{}", divider.dimmed());
         let _ = writeln!(
             out,
-            " Zero critical defects identified. Ready for pull request & QA handoff!\n"
+            " Zero critical defects identified. Ready for pull request & QA handoff!"
         );
+        if !synthesis.passed_personas.is_empty() {
+            let clean_names = synthesis.passed_personas.join(", ");
+            let _ = writeln!(
+                out,
+                " {} Clean Personas: ({clean_names})",
+                "✔".bold().green()
+            );
+        }
     } else {
         let _ = writeln!(
             out,
@@ -39,11 +45,10 @@ pub fn render_terminal_dashboard(synthesis: &AuditSynthesis) -> String {
             synthesis.major_count.to_string().bold().yellow(),
             synthesis.polish_count.to_string().bold().cyan(),
         );
-        let _ = writeln!(out, "{}", divider.dimmed());
-        let _ = writeln!(out);
 
         for (idx, finding) in synthesis.findings.iter().enumerate() {
             let num = idx + 1;
+            let _ = writeln!(out);
             let _ = writeln!(
                 out,
                 "{num}. {} {}",
@@ -78,20 +83,17 @@ pub fn render_terminal_dashboard(synthesis: &AuditSynthesis) -> String {
                     let _ = writeln!(out, "   {} {}", "│".green(), line.green());
                 }
             }
-
-            let _ = writeln!(out);
         }
-    }
 
-    if !synthesis.passed_personas.is_empty() {
-        let _ = writeln!(out, "{}", thin_divider.dimmed());
-        let _ = writeln!(
-            out,
-            " {} {} ({})",
-            "✔".bold().green(),
-            "Clean Personas:".bold(),
-            synthesis.passed_personas.join(", ").dimmed()
-        );
+        if !synthesis.passed_personas.is_empty() {
+            let _ = writeln!(out);
+            let clean_names = synthesis.passed_personas.join(", ");
+            let _ = writeln!(
+                out,
+                " {} Clean Personas: ({clean_names})",
+                "✔".bold().green()
+            );
+        }
     }
 
     let _ = writeln!(out, "{}", divider.dimmed());

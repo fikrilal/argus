@@ -51,21 +51,23 @@ pub async fn run(
 
     let failed_agents: Vec<&runner::AgentRunResult> =
         results.iter().filter(|r| !r.is_success()).collect();
-    if !failed_agents.is_empty() {
-        eprintln!(
-            "\n{}",
-            "Agent execution warnings / failures:".bold().yellow()
-        );
-        for f in failed_agents {
-            let err_summary = if f.stderr.trim().is_empty() {
-                format!("process exited with code {}", f.exit_code)
-            } else {
-                f.stderr.trim().to_string()
-            };
+    let detailed_failures: Vec<&runner::AgentRunResult> = failed_agents
+        .into_iter()
+        .filter(|f| {
+            let err = f.stderr.trim();
+            !err.is_empty()
+                && !err.starts_with("Agent execution timed out")
+                && !err.starts_with("process exited with code")
+        })
+        .collect();
+
+    if !detailed_failures.is_empty() {
+        eprintln!("\n{}", "Failure diagnostics:".bold().yellow());
+        for f in detailed_failures {
             eprintln!(
-                "  • {:<28} {}",
+                "  • {:<30} {}",
                 f.persona_name.yellow(),
-                err_summary.dimmed()
+                f.stderr.trim().dimmed()
             );
         }
     }
@@ -84,13 +86,6 @@ pub async fn run(
         .collect();
 
     let synthesis = synthesis::synthesize_reports(&reports);
-
-    println!(
-        "\n{} Swarm execution completed: {}/{} agents succeeded.",
-        "✔".bold().green(),
-        synthesis.successful_agents.to_string().bold().green(),
-        synthesis.total_agents.to_string().bold()
-    );
 
     let dashboard = synthesis::render_terminal_dashboard(&synthesis);
     print!("{dashboard}");

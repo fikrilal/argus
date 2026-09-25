@@ -1,3 +1,4 @@
+use colored::Colorize;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::sync::Arc;
 use std::time::Duration;
@@ -23,7 +24,7 @@ impl SwarmProgressTracker {
 
         let spinner_style = ProgressStyle::default_spinner()
             .tick_chars("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏ ")
-            .template("{spinner:.cyan} [{msg}] {wide_msg}")
+            .template("{spinner:.cyan} {wide_msg}")
             .unwrap_or_else(|_| ProgressStyle::default_spinner());
 
         Self { mp, spinner_style }
@@ -34,7 +35,11 @@ impl SwarmProgressTracker {
         let pb = self.mp.add(ProgressBar::new_spinner());
         pb.set_style(self.spinner_style.clone());
         pb.enable_steady_tick(Duration::from_millis(80));
-        pb.set_message(format!("{persona_name:<28}"));
+        pb.set_message(format!(
+            "{:<30} {}",
+            persona_name.bold(),
+            "auditing...".dimmed()
+        ));
 
         AgentSpinner {
             pb,
@@ -59,24 +64,31 @@ pub struct AgentSpinner {
 impl AgentSpinner {
     /// Updates the status message displayed next to the agent name.
     pub fn update_status(&self, status: &str) {
-        self.pb
-            .set_message(format!("{:<28} {}", self.persona_name, status));
+        self.pb.set_message(format!(
+            "{:<30} {}",
+            self.persona_name.bold(),
+            status.dimmed()
+        ));
     }
 
     /// Finishes the spinner indicating successful completion.
     pub fn complete(&self, duration: Duration) {
         let secs = duration.as_secs_f32();
         self.pb.finish_with_message(format!(
-            "{:<28} ✔ Completed in {:.1}s",
-            self.persona_name, secs
+            "{:<30} {} {}",
+            self.persona_name.bold(),
+            "✔ completed".bold().green(),
+            format!("({secs:.1}s)").dimmed()
         ));
     }
 
     /// Finishes the spinner indicating an error or timeout.
     pub fn fail(&self, error_message: &str) {
         self.pb.finish_with_message(format!(
-            "{:<28} ✖ Failed: {}",
-            self.persona_name, error_message
+            "{:<30} {} {}",
+            self.persona_name.bold(),
+            "✖ failed".bold().red(),
+            format!("({})", error_message.trim()).dimmed()
         ));
     }
 }
