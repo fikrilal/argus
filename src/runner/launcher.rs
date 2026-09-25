@@ -86,6 +86,7 @@ pub(crate) async fn launch_agent(
 
     let mut cmd = Command::new(&pi_bin);
     cmd.kill_on_drop(true);
+    cmd.env("ARGUS_ACTIVE_AUDIT", "1");
     cmd.current_dir(working_dir);
     cmd.arg("-p"); // Non-interactive mode
     cmd.arg("--name").arg(&plan.session_name);

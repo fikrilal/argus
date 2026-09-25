@@ -17,6 +17,12 @@ pub async fn run(
     registry: &PersonaRegistry,
     current_dir: &Path,
 ) -> Result<()> {
+    if std::env::var("ARGUS_ACTIVE_AUDIT").is_ok() {
+        anyhow::bail!(
+            "Recursive audit blocked: cannot run 'argus audit' from within an active Argus agent session."
+        );
+    }
+
     let active_branch = git::detect_current_branch(current_dir)
         .await
         .unwrap_or_else(|_| "main".to_string());

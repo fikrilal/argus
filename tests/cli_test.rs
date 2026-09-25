@@ -165,3 +165,13 @@ fn test_cli_no_args_shows_usage_error() {
         .failure()
         .stderr(predicate::str::contains("Usage: argus"));
 }
+
+#[test]
+fn test_cli_audit_blocks_recursive_invocation() {
+    let mut cmd = Command::cargo_bin("argus").expect("binary should exist");
+    cmd.env("ARGUS_ACTIVE_AUDIT", "1")
+        .args(["audit", "--full"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Recursive audit blocked"));
+}

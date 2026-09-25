@@ -100,6 +100,7 @@ pub fn build_agent_prompt(bundle: &TaskContextBundle, persona_name: &str) -> Str
     }
 
     prompt.push_str("### 3. Reporting Rubric\n");
+    prompt.push_str("Do NOT invoke recursive audit commands (such as `argus audit` or `cargo run -- audit`). Use static code inspection, `--help`, or `cargo test` to verify behavior.\n");
     prompt.push_str("Audit the code strictly according to your persona's system prompt.\n");
     prompt.push_str("If you identify defects, boundary oversights, missing rollbacks, or spec violations, report each finding in this exact format:\n\n");
     prompt.push_str("- **Status:** [VIOLATION / PASS]\n");
